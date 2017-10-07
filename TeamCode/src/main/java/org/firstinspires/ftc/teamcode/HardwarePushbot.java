@@ -10,29 +10,33 @@ public class HardwarePushbot
     /* Public OpMode members. */
     public DcMotor  leftMotor   = null;
     public DcMotor  rightMotor  = null;
+    public DcMotor  leftFrontMotor   = null;
+    public DcMotor  rightFrontMotor  = null;
+    public DcMotor  leftRearMotor   = null;
+    public DcMotor  rightRearMotor  = null;
+
+
+
     private DcMotor launcher1 = null;
     private DcMotor launcher2 = null;
-    public Servo triggerServo = null;
+    public Servo jewelServo = null;
+    public Servo glyphServo1 = null;
+    public Servo glyphServo2 = null;
 
-   //public static final double MID_SERVO       =  0.5 ;
-    //public static final double ARM_UP_POWER    =  0.45 ;
-    //public static final double ARM_DOWN_POWER  = -0.45 ;
-   private static final double TRIGGER_LOW_POSITION = 0.3;
-    private static final double TRIGGER_HIGH_POSITION = 0.0;
+
+    private static final double TRIGGER_LOW_POSITION = 0.0;
+    private static final double TRIGGER_HIGH_POSITION = 1.0;
 
 
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
     private ElapsedTime period  = new ElapsedTime();
     private boolean doesLauncherExist;
-    /* Constructor */
-    public HardwarePushbot(){
 
-    }
 
     private void initLauncher(HardwareMap hardwareMap) {
-        triggerServo = hardwareMap.servo.get("triggerServo");
-        setTriggerLow();
+        jewelServo = hardwareMap.servo.get("jewelServo");
+        //setTriggerLow();
         launcherOff();
     }
     private void setLauncherMaxSpeed(int speed) {
@@ -50,27 +54,42 @@ public class HardwarePushbot
         initLauncher(hwMap);
 
         // Define and Initialize Motors
-        leftMotor   = hwMap.dcMotor.get("left_drive");
-        rightMotor  = hwMap.dcMotor.get("right_drive");
+        leftMotor  = hwMap.dcMotor.get("lf");
+        leftMotor   = hwMap.dcMotor.get("lr");
+        leftFrontMotor  = hwMap.dcMotor.get("lf");
+        leftRearMotor   = hwMap.dcMotor.get("lr");
+        rightFrontMotor  = hwMap.dcMotor.get("rf");
+        rightRearMotor  = hwMap.dcMotor.get("rr");
+        jewelServo = hwMap.servo.get("jewelServo");
         //armMotor    = hwMap.dcMotor.get("left_arm");
-        leftMotor.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        rightMotor.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+
+        leftRearMotor.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+        rightRearMotor.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+        leftFrontMotor.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+        rightFrontMotor.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
 
         // Set all motors to zero power
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
+        leftRearMotor.setPower(0);
+        rightRearMotor.setPower(0);
+        leftFrontMotor.setPower(0);
+        rightFrontMotor.setPower(0);
+
         //armMotor.setPower(0);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftRearMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightRearMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
         //leftClaw = hwMap.servo.get("left_hand");
         //rightClaw = hwMap.servo.get("right_hand");
-        //leftClaw.setPosition(MID_SERVO);
+        //jewelServo.setPosition(0);
+        //glyphServo1.setPosition(0);
+        //glyphServo2.setPosition(0);
         //rightClaw.setPosition(MID_SERVO);
     }
 
@@ -103,15 +122,15 @@ public class HardwarePushbot
     }
 
     public void setTriggerLow() {
-        triggerServo.setPosition(TRIGGER_LOW_POSITION);
+        jewelServo.setPosition(TRIGGER_LOW_POSITION);
     }
 
     public void setTriggerHigh() {
-        triggerServo.setPosition(TRIGGER_HIGH_POSITION);
+        jewelServo.setPosition(TRIGGER_HIGH_POSITION);
     }
 
     public double getTriggerPosition() {
-        return triggerServo.getPosition();
+        return jewelServo.getPosition();
     }
 
     public void launchTheBall() throws InterruptedException {
@@ -125,3 +144,4 @@ public class HardwarePushbot
         setTriggerLow();
     }
 }
+
