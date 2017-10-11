@@ -1,42 +1,16 @@
-/* Copyright (c) 2017 FIRST. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided that
- * the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list
- * of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
- *
- * Neither the name of FIRST nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
- * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+/*
+ * Developer: Apar Mohabansi
+ * Date: 10/10/2017
  */
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Hardware;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name="Concept: TeleopDrive", group ="Concept")
+@TeleOp(name = "Concept: TeleopDrive", group = "Concept")
 //@Disabled
 public class TeleopDrive extends LinearOpMode {
     double leftFrontWheelPower;
@@ -51,15 +25,16 @@ public class TeleopDrive extends LinearOpMode {
     // Declare LinearOpMode members.
     private ElapsedTime runtime = new ElapsedTime();
 
-    @Override public void runOpMode() {
+    @Override
+    public void runOpMode() {
         telemetry.addData("Status", "Initialized");
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
         leftFrontWheelMotor = hardwareMap.get(DcMotor.class, "lf");
-        rightFrontWheelMotor =hardwareMap.get(DcMotor.class, "rf");
-        leftRearWheelMotor =hardwareMap.get(DcMotor.class, "lr");
+        rightFrontWheelMotor = hardwareMap.get(DcMotor.class, "rf");
+        leftRearWheelMotor = hardwareMap.get(DcMotor.class, "lr");
         rightRearWheelMotor = hardwareMap.get(DcMotor.class, "rr");
         // Most robots need the motor on one side to be reversed to drive forward
         // =Reverse the motor that runs backwards when connected directly to the battery
@@ -79,24 +54,33 @@ public class TeleopDrive extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            // Choose to drive using either Tank Mode, or POV Mode
-            // Comment out the method that's not used.  The default below is POV.
-
-            // POV Mode uses left stick to go forward, and right stick to turn.
-            // - This uses basic math to combine motions and is easier to drive straight.
-            double drive =  gamepad1.right_stick_y;
-            double turn  =  gamepad1.right_stick_x;
-            leftFrontWheelPower    = Range.clip(gamepad1.right_stick_y, -1.0, 1.0) ;
-            rightFrontWheelPower   = Range.clip(gamepad1.right_stick_y, -1.0, 1.0) ;
-            leftRearWheelPower     = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
-            rightRearWheelPower    = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
-
-            // Tank Mode uses one stick to control each wheel.
-            // - This requires no math, but it is hard to drive forward slowly and keep straight.
-            // leftPower  = -gamepad1.left_stick_y ;
-            // rightPower = -gamepad1.right_stick_y ;
-
             // Send calculated power to wheels
+            if (gamepad1.right_stick_x == 0) {
+                // This is for moving the robot forward and reverse
+                leftFrontWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
+                rightFrontWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
+                leftRearWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
+                rightRearWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
+            } else if (gamepad1.right_stick_y == 0) {
+                // This is for turning the robot right and left
+                leftFrontWheelPower = Range.clip(gamepad1.right_stick_x, -1.0, 1.0);
+                rightFrontWheelPower = Range.clip(-gamepad1.right_stick_x, -1.0, 1.0);
+                leftRearWheelPower = Range.clip(gamepad1.right_stick_x, -1.0, 1.0);
+                rightRearWheelPower = Range.clip(-gamepad1.right_stick_x, -1.0, 1.0);
+            } else if (gamepad1.right_trigger != 0) {
+                // This is for shifting the robot to the right
+                leftFrontWheelPower = Range.clip(gamepad1.right_trigger, -1.0, 1.0);
+                rightFrontWheelPower = Range.clip(-gamepad1.right_trigger, -1.0, 1.0);
+                leftRearWheelPower = Range.clip(-gamepad1.right_trigger, -1.0, 1.0);
+                rightRearWheelPower = Range.clip(gamepad1.right_trigger, -1.0, 1.0);
+            } else if (gamepad1.left_trigger != 0) {
+                // This is for shifting the robot to the left
+                leftFrontWheelPower = Range.clip(-gamepad1.left_trigger, -1.0, 1.0);
+                rightFrontWheelPower = Range.clip(gamepad1.left_trigger, -1.0, 1.0);
+                leftRearWheelPower = Range.clip(gamepad1.left_trigger, -1.0, 1.0);
+                rightRearWheelPower = Range.clip(-gamepad1.left_trigger, -1.0, 1.0);
+            }
+
             leftFrontWheelMotor.setPower(leftFrontWheelPower);
             rightFrontWheelMotor.setPower(rightFrontWheelPower);
             leftRearWheelMotor.setPower(leftRearWheelPower);
@@ -104,10 +88,10 @@ public class TeleopDrive extends LinearOpMode {
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "front left (%.2f), front right (%.2f), rear left (%.2f), rear right (%.2f).", leftFrontWheelPower, rightFrontWheelPower,
-                    leftRearWheelPower, rightRearWheelPower) ;
+            telemetry.addData("Motors", "front left (%.2f), front right (%.2f), rear left (%.2f)" +
+                            ", rear right (%.2f).", leftFrontWheelPower, rightFrontWheelPower,
+                    leftRearWheelPower, rightRearWheelPower);
             telemetry.update();
-
         }
 
     }
