@@ -13,10 +13,13 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp(name = "Concept: TeleopDrive", group = "Concept")
 //@Disabled
 public class TeleopDrive extends LinearOpMode {
+
+    // Define variables for power to be given to the motors.
     double leftFrontWheelPower;
     double rightFrontWheelPower;
     double leftRearWheelPower;
     double rightRearWheelPower;
+    // Define variables for motors which are connected to the wheels to rotate.
     DcMotor leftFrontWheelMotor = null;
     DcMotor rightFrontWheelMotor = null;
     DcMotor leftRearWheelMotor = null;
@@ -36,8 +39,9 @@ public class TeleopDrive extends LinearOpMode {
         rightFrontWheelMotor = hardwareMap.get(DcMotor.class, "rf");
         leftRearWheelMotor = hardwareMap.get(DcMotor.class, "lr");
         rightRearWheelMotor = hardwareMap.get(DcMotor.class, "rr");
+
         // Most robots need the motor on one side to be reversed to drive forward
-        // =Reverse the motor that runs backwards when connected directly to the battery
+        // Reverse the motor that runs backwards when connected directly to the battery
         leftFrontWheelMotor.setDirection(DcMotor.Direction.FORWARD);
         rightFrontWheelMotor.setDirection(DcMotor.Direction.REVERSE);
         leftRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -54,46 +58,69 @@ public class TeleopDrive extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            // Send calculated power to wheels
-            if (gamepad1.right_stick_x == 0) {
+            // Initialize power to zero so in case user is not pressing any keys then
+            // robot should remain in same position.
+            leftFrontWheelPower = 0;
+            rightFrontWheelPower = 0;
+            leftRearWheelPower = 0;
+            rightRearWheelPower = 0;
+
+            // calculated power to be given to wheels
+            // if power value is -ve then wheels rotate forward &
+            // when power value is +ve then wheels rotate backward
+            if (gamepad1.right_stick_y != 0) {
                 // This is for moving the robot forward and reverse
+                telemetry.addLine("forward/back");
+
+                // When Y is moved upward then system receive -ve value
+                // & when Y is moved down then system receive +ve value.
+
                 leftFrontWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
                 rightFrontWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
                 leftRearWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
                 rightRearWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
-            } else if (gamepad1.right_stick_y == 0) {
+            } else if (gamepad1.right_stick_x != 0) {
                 // This is for turning the robot right and left
-                leftFrontWheelPower = Range.clip(gamepad1.right_stick_x, -1.0, 1.0);
-                rightFrontWheelPower = Range.clip(-gamepad1.right_stick_x, -1.0, 1.0);
-                leftRearWheelPower = Range.clip(gamepad1.right_stick_x, -1.0, 1.0);
-                rightRearWheelPower = Range.clip(-gamepad1.right_stick_x, -1.0, 1.0);
+                telemetry.addLine("turning");
+
+                // Similarly when X is moved left then system receive -ve value
+                // & when X is moved right then system receive +ve value.
+
+                leftFrontWheelPower = Range.clip(-gamepad1.right_stick_x, -1.0, 1.0);
+                rightFrontWheelPower = Range.clip(gamepad1.right_stick_x, -1.0, 1.0);
+                leftRearWheelPower = Range.clip(-gamepad1.right_stick_x, -1.0, 1.0);
+                rightRearWheelPower = Range.clip(gamepad1.right_stick_x, -1.0, 1.0);
             } else if (gamepad1.right_trigger != 0) {
                 // This is for shifting the robot to the right
-                leftFrontWheelPower = Range.clip(gamepad1.right_trigger, -1.0, 1.0);
-                rightFrontWheelPower = Range.clip(-gamepad1.right_trigger, -1.0, 1.0);
-                leftRearWheelPower = Range.clip(-gamepad1.right_trigger, -1.0, 1.0);
-                rightRearWheelPower = Range.clip(gamepad1.right_trigger, -1.0, 1.0);
+                telemetry.addLine("shifting right");
+
+                leftFrontWheelPower = Range.clip(-gamepad1.right_trigger, -1.0, 1.0);
+                rightFrontWheelPower = Range.clip(gamepad1.right_trigger, -1.0, 1.0);
+                leftRearWheelPower = Range.clip(gamepad1.right_trigger, -1.0, 1.0);
+                rightRearWheelPower = Range.clip(-gamepad1.right_trigger, -1.0, 1.0);
             } else if (gamepad1.left_trigger != 0) {
                 // This is for shifting the robot to the left
-                leftFrontWheelPower = Range.clip(-gamepad1.left_trigger, -1.0, 1.0);
-                rightFrontWheelPower = Range.clip(gamepad1.left_trigger, -1.0, 1.0);
-                leftRearWheelPower = Range.clip(gamepad1.left_trigger, -1.0, 1.0);
-                rightRearWheelPower = Range.clip(-gamepad1.left_trigger, -1.0, 1.0);
+                telemetry.addLine("shifting left");
+
+                leftFrontWheelPower = Range.clip(gamepad1.left_trigger, -1.0, 1.0);
+                rightFrontWheelPower = Range.clip(-gamepad1.left_trigger, -1.0, 1.0);
+                leftRearWheelPower = Range.clip(-gamepad1.left_trigger, -1.0, 1.0);
+                rightRearWheelPower = Range.clip(gamepad1.left_trigger, -1.0, 1.0);
             }
 
+            // Send calculated power to wheels
             leftFrontWheelMotor.setPower(leftFrontWheelPower);
             rightFrontWheelMotor.setPower(rightFrontWheelPower);
             leftRearWheelMotor.setPower(leftRearWheelPower);
-            rightRearWheelMotor.setPower(leftRearWheelPower);
+            rightRearWheelMotor.setPower(rightRearWheelPower);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "front left (%.2f), front right (%.2f), rear left (%.2f)" +
                             ", rear right (%.2f).", leftFrontWheelPower, rightFrontWheelPower,
                     leftRearWheelPower, rightRearWheelPower);
+
             telemetry.update();
         }
-
     }
 }
-
