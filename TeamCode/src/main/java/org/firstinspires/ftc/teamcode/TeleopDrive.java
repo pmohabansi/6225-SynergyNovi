@@ -7,6 +7,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -19,11 +20,15 @@ public class TeleopDrive extends LinearOpMode {
     double rightFrontWheelPower;
     double leftRearWheelPower;
     double rightRearWheelPower;
+    double leftArm;
+    double rightArm;
     // Define variables for motors which are connected to the wheels to rotate.
     DcMotor leftFrontWheelMotor = null;
     DcMotor rightFrontWheelMotor = null;
     DcMotor leftRearWheelMotor = null;
     DcMotor rightRearWheelMotor = null;
+    Servo leftArmMotor = null;
+    Servo rightArmMotor = null;
 
     // Declare LinearOpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -39,6 +44,8 @@ public class TeleopDrive extends LinearOpMode {
         rightFrontWheelMotor = hardwareMap.get(DcMotor.class, "rf");
         leftRearWheelMotor = hardwareMap.get(DcMotor.class, "lr");
         rightRearWheelMotor = hardwareMap.get(DcMotor.class, "rr");
+        leftArmMotor = hardwareMap.servo.get("las");
+        rightArmMotor = hardwareMap.servo.get("ras");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -46,11 +53,16 @@ public class TeleopDrive extends LinearOpMode {
         rightFrontWheelMotor.setDirection(DcMotor.Direction.REVERSE);
         leftRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
         rightRearWheelMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftArmMotor.setDirection(Servo.Direction.FORWARD);
+        rightArmMotor.setDirection(Servo.Direction.REVERSE);
 
         leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        leftArmMotor.setPosition(0.0);
+        rightArmMotor.setPosition(0.0);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -107,7 +119,20 @@ public class TeleopDrive extends LinearOpMode {
                 leftRearWheelPower = Range.clip(-gamepad1.left_trigger, -1.0, 1.0);
                 rightRearWheelPower = Range.clip(gamepad1.left_trigger, -1.0, 1.0);
             }
+            if (gamepad2.right_trigger != 0) {
+                leftArmMotor.setPosition(0.2);
+                rightArmMotor.setPosition(0.2);
+                telemetry.addData("left Arm Position", leftArmMotor.getPosition());
+                telemetry.addData("right Arm Position", rightArmMotor.getPosition());
+            }
+            if (gamepad2.left_trigger != 0) {
+                leftArmMotor.setPosition(0.0);
+                rightArmMotor.setPosition(0.0);
+                telemetry.addData("left Arm Position", leftArmMotor.getPosition());
+                telemetry.addData("right Arm Position", rightArmMotor.getPosition());
+            }
 
+            telemetry.addLine("");
             // Send calculated power to wheels
             leftFrontWheelMotor.setPower(leftFrontWheelPower);
             rightFrontWheelMotor.setPower(rightFrontWheelPower);
