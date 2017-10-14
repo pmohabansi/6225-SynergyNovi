@@ -20,7 +20,7 @@ public class TeleopDrive extends LinearOpMode {
     double rightFrontWheelPower;
     double leftRearWheelPower;
     double rightRearWheelPower;
-
+    double range = 0.5;
     // Define variables for motors which are connected to the wheels to rotate.
     DcMotor leftFrontWheelMotor = null;
     DcMotor rightFrontWheelMotor = null;
@@ -86,10 +86,10 @@ public class TeleopDrive extends LinearOpMode {
                 // When Y is moved upward then system receive -ve value
                 // & when Y is moved down then system receive +ve value.
 
-                leftFrontWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
-                rightFrontWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
-                leftRearWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
-                rightRearWheelPower = Range.clip(gamepad1.right_stick_y, -1.0, 1.0);
+                leftFrontWheelPower = Range.clip(gamepad1.right_stick_y, -range, range);
+                rightFrontWheelPower = Range.clip(gamepad1.right_stick_y, -range, range);
+                leftRearWheelPower = Range.clip(gamepad1.right_stick_y, -range, range);
+                rightRearWheelPower = Range.clip(gamepad1.right_stick_y, -range, range);
             } else if (gamepad1.right_stick_x != 0) {
                 // This is for turning the robot right and left
                 telemetry.addLine("turning");
@@ -97,26 +97,26 @@ public class TeleopDrive extends LinearOpMode {
                 // Similarly when X is moved left then system receive -ve value
                 // & when X is moved right then system receive +ve value.
 
-                leftFrontWheelPower = Range.clip(-gamepad1.right_stick_x, -1.0, 1.0);
-                rightFrontWheelPower = Range.clip(gamepad1.right_stick_x, -1.0, 1.0);
-                leftRearWheelPower = Range.clip(-gamepad1.right_stick_x, -1.0, 1.0);
-                rightRearWheelPower = Range.clip(gamepad1.right_stick_x, -1.0, 1.0);
+                leftFrontWheelPower = Range.clip(-gamepad1.right_stick_x, -range, range);
+                rightFrontWheelPower = Range.clip(gamepad1.right_stick_x, -range, range);
+                leftRearWheelPower = Range.clip(-gamepad1.right_stick_x, -range, range);
+                rightRearWheelPower = Range.clip(gamepad1.right_stick_x, -range, range);
             } else if (gamepad1.right_trigger != 0) {
                 // This is for shifting the robot to the right
                 telemetry.addLine("shifting right");
 
-                leftFrontWheelPower = Range.clip(-gamepad1.right_trigger, -1.0, 1.0);
-                rightFrontWheelPower = Range.clip(gamepad1.right_trigger, -1.0, 1.0);
-                leftRearWheelPower = Range.clip(gamepad1.right_trigger, -1.0, 1.0);
-                rightRearWheelPower = Range.clip(-gamepad1.right_trigger, -1.0, 1.0);
+                leftFrontWheelPower = Range.clip(-gamepad1.right_trigger, -range, range);
+                rightFrontWheelPower = Range.clip(gamepad1.right_trigger, -range, range);
+                leftRearWheelPower = Range.clip(gamepad1.right_trigger, -range, range);
+                rightRearWheelPower = Range.clip(-gamepad1.right_trigger, -range, range);
             } else if (gamepad1.left_trigger != 0) {
                 // This is for shifting the robot to the left
                 telemetry.addLine("shifting left");
 
-                leftFrontWheelPower = Range.clip(gamepad1.left_trigger, -1.0, 1.0);
-                rightFrontWheelPower = Range.clip(-gamepad1.left_trigger, -1.0, 1.0);
-                leftRearWheelPower = Range.clip(-gamepad1.left_trigger, -1.0, 1.0);
-                rightRearWheelPower = Range.clip(gamepad1.left_trigger, -1.0, 1.0);
+                leftFrontWheelPower = Range.clip(gamepad1.left_trigger, -range, range);
+                rightFrontWheelPower = Range.clip(-gamepad1.left_trigger, -range, range);
+                leftRearWheelPower = Range.clip(-gamepad1.left_trigger, -range, range);
+                rightRearWheelPower = Range.clip(gamepad1.left_trigger, -range, range);
             }
             if (gamepad2.right_trigger != 0) {
                 leftArmMotor.setPosition(0.2);
