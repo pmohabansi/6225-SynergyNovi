@@ -117,6 +117,39 @@ public class TeleopDrive extends LinearOpMode {
                 rightFrontWheelPower = Range.clip(-gamepad1.left_trigger, -range, range);
                 leftRearWheelPower = Range.clip(-gamepad1.left_trigger, -range, range);
                 rightRearWheelPower = Range.clip(gamepad1.left_trigger, -range, range);
+
+            } else if ((gamepad1.left_stick_x > 0) && (gamepad1.left_stick_y < 0)) {
+                // This is for moving the robot to the diagonal forward right
+                telemetry.addLine("diagonal forward right");
+
+                leftFrontWheelPower = -range;
+                rightFrontWheelPower = 0;
+                leftRearWheelPower = 0;
+                rightRearWheelPower = -range;
+            } else if ((gamepad1.left_stick_x < 0) && (gamepad1.left_stick_y > 0)) {
+                // This is for moving the robot to the diagonal backward left
+                telemetry.addLine("diagonal backward left");
+
+                leftFrontWheelPower = range;
+                rightFrontWheelPower = 0;
+                leftRearWheelPower = 0;
+                rightRearWheelPower = range;
+            } else if ((gamepad1.left_stick_x < 0) && (gamepad1.left_stick_y < 0)) {
+                // This is for moving the robot to the diagonal forward left
+                telemetry.addLine("diagonal forward left");
+
+                leftFrontWheelPower = 0;
+                rightFrontWheelPower = -range;
+                leftRearWheelPower = -range;
+                rightRearWheelPower = 0;
+            } else if ((gamepad1.left_stick_x > 0) && (gamepad1.left_stick_y > 0)) {
+                // This is for moving the robot to the diagonal backward right
+                telemetry.addLine("diagonal backward right");
+
+                leftFrontWheelPower = 0;
+                rightFrontWheelPower = range;
+                leftRearWheelPower = range;
+                rightRearWheelPower = 0;
             }
             if (gamepad2.right_trigger != 0) {
                 leftArmMotor.setPosition(0.2);
