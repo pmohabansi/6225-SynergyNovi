@@ -22,6 +22,9 @@ public class TeleopDrive extends LinearOpMode {
     double rightRearWheelPower;
     double armLiftPower;
     double range = 0.5;
+    double openArmPosition = 0.3;
+    double grabArmPosition = 0.6;
+
     // Define variables for motors which are connected to the wheels to rotate.
     DcMotor leftFrontWheelMotor = null;
     DcMotor rightFrontWheelMotor = null;
@@ -64,8 +67,8 @@ public class TeleopDrive extends LinearOpMode {
         leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         armLiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftArmMotor.setPosition(0.0);
-        rightArmMotor.setPosition(0.0);
+        leftArmMotor.setPosition(openArmPosition);
+        rightArmMotor.setPosition(openArmPosition);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -158,14 +161,14 @@ public class TeleopDrive extends LinearOpMode {
             }
             if (gamepad2.right_trigger != 0) {
                 // This is for opening the arms
-                leftArmMotor.setPosition(0.6);
-                rightArmMotor.setPosition(0.6);
+                leftArmMotor.setPosition(grabArmPosition);
+                rightArmMotor.setPosition(grabArmPosition);
                 telemetry.addData("left Arm Position", leftArmMotor.getPosition());
                 telemetry.addData("right Arm Position", rightArmMotor.getPosition());
             } else if (gamepad2.left_trigger != 0) {
                 // This is for closing the arms
-                leftArmMotor.setPosition(0.0);
-                rightArmMotor.setPosition(0.0);
+                leftArmMotor.setPosition(openArmPosition);
+                rightArmMotor.setPosition(openArmPosition);
                 telemetry.addData("left Arm Position", leftArmMotor.getPosition());
                 telemetry.addData("right Arm Position", rightArmMotor.getPosition());
             } else if (gamepad2.right_stick_y != 0) {
