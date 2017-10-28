@@ -55,7 +55,6 @@ public class TeleopDrive extends LinearOpMode {
         rightFrontWheelMotor.setDirection(DcMotor.Direction.REVERSE);
         leftRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
         rightRearWheelMotor.setDirection(DcMotor.Direction.REVERSE);
-        rightRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
         armLiftMotor.setDirection(DcMotor.Direction.FORWARD);
         leftArmMotor.setDirection(Servo.Direction.FORWARD);
         rightArmMotor.setDirection(Servo.Direction.REVERSE);
@@ -159,8 +158,8 @@ public class TeleopDrive extends LinearOpMode {
             }
             if (gamepad2.right_trigger != 0) {
                 // This is for opening the arms
-                leftArmMotor.setPosition(0.2);
-                rightArmMotor.setPosition(0.2);
+                leftArmMotor.setPosition(0.6);
+                rightArmMotor.setPosition(0.6);
                 telemetry.addData("left Arm Position", leftArmMotor.getPosition());
                 telemetry.addData("right Arm Position", rightArmMotor.getPosition());
             } else if (gamepad2.left_trigger != 0) {
