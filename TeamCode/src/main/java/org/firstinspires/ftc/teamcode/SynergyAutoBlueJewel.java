@@ -37,7 +37,6 @@ import android.graphics.Color;
 import android.view.View;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -59,12 +58,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-
-
 
 @Autonomous(name = "SynergyAutoBlueJewel", group = "Autonomous")
 //@Disabled
@@ -74,22 +67,26 @@ public class SynergyAutoBlueJewel extends LinearOpMode {
     DcMotor rightFrontWheelMotor = null;
     DcMotor leftRearWheelMotor = null;
     DcMotor rightRearWheelMotor = null;
+    DcMotor armLiftMotor = null;
     Servo   jewelServo = null;
+    Servo   leftArmMotor = null;
+    Servo   rightArmMotor = null;
 
     private ElapsedTime runtime = new ElapsedTime();
 
     static final double INCREMENT = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int CYCLE_MS = 50;     // period of each cycle
+    static final int    CYCLE_MS = 50;     // period of each cycle
     static final double MAX_POS = 1.0;     // Maximum rotational position
     static final double MIN_POS = 0.0;     // Minimum rotational position
 
     static final double COUNTS_PER_MOTOR_REV  = 1120;    // eg: TETRIX Motor Encoder
     static final double DRIVE_GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
-    static final double COUNTS_PER_INCH       = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-                                                (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double DRIVE_SPEED = 0.6;
-    static final double TURN_SPEED  = 0.5;
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+                                          (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double DRIVE_SPEED = 0.4;
+    static final double TURN_SPEED  = 0.4;
+    static final double DISTANCE_IN_INCHES_PER_SECOND = 30.75;    // at power 0.4
     /**
      * The colorSensor field will contain a reference to our color sensor hardware object
      */
@@ -109,7 +106,6 @@ public class SynergyAutoBlueJewel extends LinearOpMode {
     OpenGLMatrix lastLocation = null;
     RelicRecoveryVuMark vuMarkIdentification = null;
 
-
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
      * localization engine.
@@ -123,21 +119,46 @@ public class SynergyAutoBlueJewel extends LinearOpMode {
         rightFrontWheelMotor = hardwareMap.get(DcMotor.class, "rf");
         leftRearWheelMotor = hardwareMap.get(DcMotor.class, "lr");
         rightRearWheelMotor = hardwareMap.get(DcMotor.class, "rr");
-        jewelServo = hardwareMap.get(Servo.class,"jewelServo" );
+        armLiftMotor = hardwareMap.dcMotor.get("al");
+        leftArmMotor = hardwareMap.servo.get("las");
+        rightArmMotor = hardwareMap.servo.get("ras");
+        jewelServo = hardwareMap.get(Servo.class, "jewelServo");
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        leftFrontWheelMotor.setDirection(DcMotor.Direction.FORWARD);
-        rightFrontWheelMotor.setDirection(DcMotor.Direction.REVERSE);
-        leftRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
-        rightRearWheelMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontWheelMotor.setDirection(DcMotor.Direction.REVERSE);  //left of the robot (when facing away from robot)
+        rightFrontWheelMotor.setDirection(DcMotor.Direction.FORWARD);
+        leftRearWheelMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
+
+
+        armLiftMotor.setDirection(DcMotor.Direction.FORWARD);
+        leftArmMotor.setDirection(Servo.Direction.FORWARD);
+        rightArmMotor.setDirection(Servo.Direction.REVERSE);
+
+        leftFrontWheelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRearWheelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFrontWheelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRearWheelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Zero out the encoders
+        leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         leftFrontWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFrontWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftRearWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightRearWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        this.leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armLiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Resetting Encoders");    //
@@ -152,17 +173,83 @@ public class SynergyAutoBlueJewel extends LinearOpMode {
                 this.jewelServo.getPosition());
         telemetry.update();
 
+           /*
+        * To start up Vuforia, tell it the view that we wish to use for camera monitor (on the RC phone);
+        * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
+        */
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
+        // OR...  Do Not Activate the Camera Monitor View, to save power
+        // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        /*
+         * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
+         * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
+         * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
+         * web site at https://developer.vuforia.com/license-manager.
+         *
+         * Vuforia license keys are always 380 characters long, and look as if they contain mostly
+         * random data. As an example, here is a example of a fragment of a valid key:
+         *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
+         * Once you've obtained a license key, copy the string from the Vuforia web site
+         * and paste it in to your code onthe next line, between the double quotes.
+         */
+        parameters.vuforiaLicenseKey = "AToaQHT/////AAAAGVlEmfHGCEBvpO9+LDtLj0l8DvOeohU4FwBvMiWCfaZuiAhtRFKLnku1xVmWpr1AyFGJ3vufY4HpayP44D5ZSmVg6pxonVjXN4HULK10Z3sA8zXdGbHccIkVp0h7teeFC7OyI3cy/+/I6scuRBWgUYjP0300xAD80dfV/Z5ra8MTHW3OuLyd4hpC/EMP27Af5a+M+Z2+DaEYw78jGKAW335HsHRC45E65I2ozwtIEwnJDeCvHD4ulFnC0v/+4kUDynCAKBd9eNvidbixN6nWN7ltOYFf4TwTYNLMKNgIex0zyGUjRfabJGugkCgB2dKbKrNzMYK2oLOqODgcaI7lHdkGosf00X1X3yduZOuh/ccY";
+
+        /*
+         * We also indicate which camera on the RC that we wish to use.
+         * Here we chose the back (HiRes) camera (for greater range), but
+         * for a competition robot, the front camera might be more convenient.
+         */
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        //move servo -90 to lower the arm with color sensor
+        leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        leftFrontWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFrontWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftRearWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightRearWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        this.leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         //note: servo move + makes the arm go down
+        //grip glyph in arm
+        double leftArmInitPosition = this.leftArmMotor.getPosition();
+        this.leftArmMotor.setPosition(leftArmInitPosition + 0.1);
+        double rightArmInitPosition = this.rightArmMotor.getPosition();
+        this.rightArmMotor.setPosition(rightArmInitPosition + 0.2);
+        //lift glyph inside the arms of the glyph attatchment
+        this.armLiftMotor.setPower(-0.2);
+        while (opModeIsActive() && (runtime.seconds() < 2)) {
+            idle();
+        }
+        this.armLiftMotor.setPower(0);
+        //sense the pictograph
+        sensePictograph();
+        telemetry.addData("VuMar1k", "%s visible", vuMark1);
+        telemetry.update();
+        //lower jewelArm to sense color
+        double armLeftInitPosition = this.leftArmMotor.getPosition();
+        this.leftArmMotor.setPosition(armLeftInitPosition + 0.1);
+        double armRightInitPosition = this.rightArmMotor.getPosition();
+        this.rightArmMotor.setPosition(armRightInitPosition + 0.1);
         double servoInitPosition = this.jewelServo.getPosition();
-        this.jewelServo.setPosition(servoInitPosition + 0.75);
+        this.jewelServo.setPosition(servoInitPosition + 0.8);
         //sense ball color
         runtime.reset();
         double tmphsvValueZero = 0;
-        while (runtime.seconds() < 5.0) {
+        while (runtime.seconds() < 2.0) {
             senseColor();
             telemetry.addLine()
                     .addData("H", "%.3f", hsvValues[0])
@@ -171,20 +258,158 @@ public class SynergyAutoBlueJewel extends LinearOpMode {
             telemetry.update();
             tmphsvValueZero = Math.max(tmphsvValueZero, hsvValues[0]);
         }
-
+        //inches from starting point, to right column
+        double distanceToRightColumn = 23.5;
+        double distanceToColumn = 0;
         //move forward if red, backwards if blue
-        if (tmphsvValueZero <= 300.0  && tmphsvValueZero >= 120.0) {
-            encoderDrive(DRIVE_SPEED, 0, 1);
+        if (tmphsvValueZero <= 300.0 && tmphsvValueZero >= 120.0) {
+            encoderDrive(DRIVE_SPEED, 0, -5.0);
+            //sleep(1000);
             this.jewelServo.setPosition(servoInitPosition);
-            encoderDrive(DRIVE_SPEED, 0, -1);
+            //sleep(1000);
+            if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+                distanceToColumn = distanceToRightColumn + 5.0 + 7.63 * 2.0;
+            } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+                distanceToColumn = distanceToRightColumn + 5.0 + 7.63;
+            } else {
+                distanceToColumn = distanceToRightColumn + 5.0;
+            }
         } else {
-            encoderDrive(DRIVE_SPEED, 0, -1);
+            encoderDrive(DRIVE_SPEED, 0, 5.0);
+            //sleep(1000);
             this.jewelServo.setPosition(servoInitPosition);
-            encoderDrive(DRIVE_SPEED, 0, 1);
+            //sleep(1000);
+            if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+                distanceToColumn = distanceToRightColumn - 5.0 + 7.63 * 2.0;
+            } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+                distanceToColumn = distanceToRightColumn - 5.0 + 7.63;
+            } else {
+                distanceToColumn = distanceToRightColumn - 5.0;
+            }
+        }
+        //sleep(1000);
+        //move forward to cryptobox position
+        encoderDrive(DRIVE_SPEED, 0, distanceToColumn + 2);
+        //turn 90 degrees right
+        encoderDrive(DRIVE_SPEED, 1, 20);
+        //move glyph into cryptobox
+        encoderDrive(DRIVE_SPEED, 0, 7.5);
+        //open glyph arm
+        this.leftArmMotor.setPosition(leftArmInitPosition - 0.1);
+        this.rightArmMotor.setPosition(rightArmInitPosition - 0.1);
+        //park in safezone
+        encoderDrive(DRIVE_SPEED, 0, -3);
+        encoderDrive(DRIVE_SPEED, -1, 20);
+        double safeZoneDist = 7;
+        if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+            safeZoneDist = -safeZoneDist;
+        } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+            safeZoneDist = 0;
+        }
+        encoderDrive(DRIVE_SPEED, 0, safeZoneDist);
+        //glide right into safezone
+        encoderDrive(DRIVE_SPEED, 2, 8);
+    }
+
+    //gives the programing for non encoder drive
+    public void nonEncoderDrive(double speed, int drive_mode, double distanceInches) throws InterruptedException {
+        double newLeftFrontTarget = 0;
+        double newRightFrontTarget = 0;
+        double newLeftRearTarget = 0;
+        double newRightRearTarget = 0;
+
+//        this.leftFrontWheelMotor.setPower(Math.abs(speed));
+//        this.leftRearWheelMotor.setPower(Math.abs(speed));
+//        this.rightFrontWheelMotor.setPower(Math.abs(speed));
+//        this.rightRearWheelMotor.setPower(Math.abs(speed));
+
+        //use encoders, when wheels are moving to keep at a certain speed
+        this.leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        this.leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        this.rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+//        leftFrontWheelMotor.setTargetPosition(leftFrontWheelMotor.getCurrentPosition());
+//        rightFrontWheelMotor.setTargetPosition(rightFrontWheelMotor.getCurrentPosition());
+//        leftRearWheelMotor.setTargetPosition(leftRearWheelMotor.getCurrentPosition());
+//        rightRearWheelMotor.setTargetPosition(rightRearWheelMotor.getCurrentPosition());
+//
+//        this.leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        this.leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        this.rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+//        telemetry.addData("Status1", "Run Time: " + runtime.toString());
+//        telemetry.addData("Path01", "Running at %7d :%7d %7d :%7d",
+//                leftFrontWheelMotor.getCurrentPosition(),
+//                leftRearWheelMotor.getCurrentPosition(),
+//                rightFrontWheelMotor.getCurrentPosition(),
+//                rightRearWheelMotor.getCurrentPosition());
+//        telemetry.update();
+//
+//        sleep(1000);
+
+        //drive_mode==0 means, move straight
+        //if drive_mode==-1 means, turn left
+        //if drive_mode==1 means, turn right
+        if (drive_mode == 0) {
+            // Determine new target position, and pass to motor controller
+            telemetry.addLine("move straight");
+            telemetry.update();
+            newLeftFrontTarget = speed;
+            newLeftRearTarget = speed;
+            newRightFrontTarget = speed;
+            newRightRearTarget = speed;
+        } else if (drive_mode == -1) {
+            // Determine new target position, and pass to motor controller
+            telemetry.addLine("turn left");
+            telemetry.update();
+            newLeftFrontTarget = -speed;
+            newLeftRearTarget = -speed;
+            newRightFrontTarget = speed;
+            newRightRearTarget = speed;
+        } else if (drive_mode == 1) {
+            // Determine new target position, and pass to motor controller
+            telemetry.addLine("turn right");
+            telemetry.update();
+            newLeftFrontTarget = speed;
+            newLeftRearTarget = speed;
+            newRightFrontTarget = -speed;
+            newRightRearTarget = -speed;
         }
 
         sleep(1000);
+//        this.leftFrontWheelMotor.setTargetPosition(newLeftFrontTarget);
+//        this.leftRearWheelMotor.setTargetPosition(newLeftRearTarget);
+//        this.rightFrontWheelMotor.setTargetPosition(newRightFrontTarget);
+//        this.rightRearWheelMotor.setTargetPosition(newRightRearTarget);
 
+        this.leftFrontWheelMotor.setPower(newLeftFrontTarget);
+        this.leftRearWheelMotor.setPower(newLeftRearTarget);
+        this.rightFrontWheelMotor.setPower(newRightFrontTarget);
+        this.rightRearWheelMotor.setPower(newRightRearTarget);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < distanceInches / DISTANCE_IN_INCHES_PER_SECOND)) {
+            telemetry.addData("Status2", "Run Time: " + runtime.toString());
+            telemetry.addData("Path2", "Running at %7d :%7d %7d :%7d : %7d :%7d %7d :%7d",
+                    newLeftFrontTarget,
+                    newLeftRearTarget,
+                    newRightFrontTarget,
+                    newRightRearTarget,
+                    leftFrontWheelMotor.getCurrentPosition(),
+                    leftRearWheelMotor.getCurrentPosition(),
+                    rightFrontWheelMotor.getCurrentPosition(),
+                    rightRearWheelMotor.getCurrentPosition());
+            telemetry.update();
+            idle();
+        }
+        // Stop all motion;
+        this.leftFrontWheelMotor.setPower(0);
+        this.leftRearWheelMotor.setPower(0);
+        this.rightFrontWheelMotor.setPower(0);
+        this.rightRearWheelMotor.setPower(0);
+
+        sleep(1000);   // optional pause after each move
     }
 
     /*
@@ -196,87 +421,156 @@ public class SynergyAutoBlueJewel extends LinearOpMode {
      *  3) Driver stops the opmode running.
      */
     //gives the programing for encoder drive
-    public void encoderDrive(double speed, int drive_mode, double distanceInches ) throws InterruptedException {
-        int newLeftFrontTarget=0;
-        int newRightFrontTarget=0;
-        int newLeftRearTarget=0;
-        int newRightRearTarget=0;
+    public void encoderDrive(double speed, int drive_mode, double distanceInches) throws InterruptedException {
+        int newLeftFrontTarget = 0;
+        int newRightFrontTarget = 0;
+        int newLeftRearTarget = 0;
+        int newRightRearTarget = 0;
 
-        this.leftFrontWheelMotor.setPower(Math.abs(speed));
-        this.leftRearWheelMotor.setPower(Math.abs(speed));
-        this.rightFrontWheelMotor.setPower(Math.abs(speed));
-        this.rightRearWheelMotor.setPower(Math.abs(speed));
+        leftFrontWheelMotor.setDirection(DcMotor.Direction.REVERSE);  //left of the robot (when facing away from robot)
+        rightFrontWheelMotor.setDirection(DcMotor.Direction.FORWARD);
+        leftRearWheelMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        leftFrontWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFrontWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftRearWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightRearWheelMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //use encoders, when wheels are moving to keep at a certain speed
-//        this.leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        this.leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        this.rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        leftFrontWheelMotor.setTargetPosition(leftFrontWheelMotor.getCurrentPosition());
-        rightFrontWheelMotor.setTargetPosition(rightFrontWheelMotor.getCurrentPosition());
-        leftRearWheelMotor.setTargetPosition(leftRearWheelMotor.getCurrentPosition());
-        rightRearWheelMotor.setTargetPosition(rightRearWheelMotor.getCurrentPosition());
+//        this.leftFrontWheelMotor.setTargetPosition(this.leftFrontWheelMotor.getCurrentPosition());
+//        this.rightFrontWheelMotor.setTargetPosition(this.rightFrontWheelMotor.getCurrentPosition());
+//        this.leftRearWheelMotor.setTargetPosition(this.leftRearWheelMotor.getCurrentPosition());
+//        this.rightRearWheelMotor.setTargetPosition(this.rightRearWheelMotor.getCurrentPosition());
+
+//        this.leftFrontWheelMotor.setTargetPosition(0);
+//        this.rightFrontWheelMotor.setTargetPosition(0);
+//        this.leftRearWheelMotor.setTargetPosition(0);
+//        this.rightRearWheelMotor.setTargetPosition(0);
 
         this.leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        while (leftFrontWheelMotor.isBusy() || rightFrontWheelMotor.isBusy() ||
-                leftRearWheelMotor.isBusy() || rightFrontWheelMotor.isBusy()) {
-            idle();
-        }
+//        while (opModeIsActive() && (leftFrontWheelMotor.isBusy() || rightFrontWheelMotor.isBusy() ||
+//                leftRearWheelMotor.isBusy() || rightFrontWheelMotor.isBusy())) {
+//            telemetry.addData("Status1", "Run Time: " + runtime.toString());
+//            telemetry.addData("Path01", "Running at %7d :%7d %7d :%7d",
+//                    leftFrontWheelMotor.getCurrentPosition(),
+//                    leftRearWheelMotor.getCurrentPosition(),
+//                    rightFrontWheelMotor.getCurrentPosition(),
+//                    rightRearWheelMotor.getCurrentPosition());
+//            telemetry.update();
+//        }
 
+        //sleep(5000);
 
         //drive_mode==0 means, move straight
         //if drive_mode==-1 means, turn left
         //if drive_mode==1 means, turn right
-        if (drive_mode==0) {
+        if (drive_mode == 0) {
             // Determine new target position, and pass to motor controller
+            //telemetry.addLine("move straight");
+            //telemetry.update();
             newLeftFrontTarget = this.leftFrontWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
             newLeftRearTarget = this.leftRearWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
             newRightFrontTarget = this.rightFrontWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
             newRightRearTarget = this.rightRearWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
-        }
-        if (drive_mode==-1) {
+
+            telemetry.addData("drive_mode 0", "Running at %7d :%7d %7d :%7d : %7d :%7d %7d :%7d",
+                    newLeftFrontTarget,
+                    newLeftRearTarget,
+                    newRightFrontTarget,
+                    newRightRearTarget,
+                    this.leftFrontWheelMotor.getCurrentPosition(),
+                    this.leftRearWheelMotor.getCurrentPosition(),
+                    this.rightFrontWheelMotor.getCurrentPosition(),
+                    this.rightRearWheelMotor.getCurrentPosition());
+            telemetry.update();
+        } else if (drive_mode == -1) {
             // Determine new target position, and pass to motor controller
+            telemetry.addLine("turn left");
+            telemetry.update();
             newLeftFrontTarget = this.leftFrontWheelMotor.getCurrentPosition() + (int) (-distanceInches * COUNTS_PER_INCH);
             newLeftRearTarget = this.leftRearWheelMotor.getCurrentPosition() + (int) (-distanceInches * COUNTS_PER_INCH);
             newRightFrontTarget = this.rightFrontWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
             newRightRearTarget = this.rightRearWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
-        }
-        if (drive_mode==1) {
+        } else if (drive_mode == 1) {
             // Determine new target position, and pass to motor controller
+            telemetry.addLine("turn right");
+            telemetry.update();
             newLeftFrontTarget = this.leftFrontWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
             newLeftRearTarget = this.leftRearWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
             newRightFrontTarget = this.rightFrontWheelMotor.getCurrentPosition() + (int) (-distanceInches * COUNTS_PER_INCH);
             newRightRearTarget = this.rightRearWheelMotor.getCurrentPosition() + (int) (-distanceInches * COUNTS_PER_INCH);
+        } else if (drive_mode == 2) {
+            // Determine new target position, and pass to motor controller
+            telemetry.addLine("glide right");
+            telemetry.update();
+            newLeftFrontTarget = this.leftFrontWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
+            newLeftRearTarget = this.leftRearWheelMotor.getCurrentPosition() + (int) (-distanceInches * COUNTS_PER_INCH);
+            newRightFrontTarget = this.rightFrontWheelMotor.getCurrentPosition() + (int) (-distanceInches * COUNTS_PER_INCH);
+            newRightRearTarget = this.rightRearWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
+        } else if (drive_mode == -2) {
+            // Determine new target position, and pass to motor controller
+            telemetry.addLine("glide left");
+            telemetry.update();
+            newLeftFrontTarget = this.leftFrontWheelMotor.getCurrentPosition() + (int) (-distanceInches * COUNTS_PER_INCH);
+            newLeftRearTarget = this.leftRearWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
+            newRightFrontTarget = this.rightFrontWheelMotor.getCurrentPosition() + (int) (distanceInches * COUNTS_PER_INCH);
+            newRightRearTarget = this.rightRearWheelMotor.getCurrentPosition() + (int) (-distanceInches * COUNTS_PER_INCH);
         }
+
+        //sleep(5000);
 
         this.leftFrontWheelMotor.setTargetPosition(newLeftFrontTarget);
         this.leftRearWheelMotor.setTargetPosition(newLeftRearTarget);
         this.rightFrontWheelMotor.setTargetPosition(newRightFrontTarget);
         this.rightRearWheelMotor.setTargetPosition(newRightRearTarget);
 
-        while (leftFrontWheelMotor.isBusy() || rightFrontWheelMotor.isBusy() ||
-                leftRearWheelMotor.isBusy() || rightFrontWheelMotor.isBusy()) {
+        this.leftFrontWheelMotor.setPower(Math.abs(speed));
+        this.leftRearWheelMotor.setPower(Math.abs(speed));
+        this.rightFrontWheelMotor.setPower(Math.abs(speed));
+        this.rightRearWheelMotor.setPower(Math.abs(speed));
+
+        while (opModeIsActive() && (leftFrontWheelMotor.isBusy() || rightFrontWheelMotor.isBusy() ||
+                leftRearWheelMotor.isBusy() || rightFrontWheelMotor.isBusy())) {
+            telemetry.addData("Status2", "Run Time: " + runtime.toString());
+            telemetry.addData("Path2", "Running at %7d :%7d %7d :%7d : %7d :%7d %7d :%7d",
+                    newLeftFrontTarget,
+                    newLeftRearTarget,
+                    newRightFrontTarget,
+                    newRightRearTarget,
+                    leftFrontWheelMotor.getCurrentPosition(),
+                    leftRearWheelMotor.getCurrentPosition(),
+                    rightFrontWheelMotor.getCurrentPosition(),
+                    rightRearWheelMotor.getCurrentPosition());
+            telemetry.update();
             idle();
         }
+        //sleep(5000);   // optional pause after each move
         // Stop all motion;
         this.leftFrontWheelMotor.setPower(0);
         this.leftRearWheelMotor.setPower(0);
         this.rightFrontWheelMotor.setPower(0);
         this.rightRearWheelMotor.setPower(0);
+        //sleep(5000);   // optional pause after each move
 
-        telemetry.addData("Path2", "Running at %7d :%7d %7d :%7d",
-                    this.leftFrontWheelMotor.getCurrentPosition(),
-                    this.leftRearWheelMotor.getCurrentPosition(),
-                    this.rightFrontWheelMotor.getCurrentPosition(),
-                    this.rightRearWheelMotor.getCurrentPosition());
-
-        telemetry.update();
-        sleep(500);   // optional pause after each move
+        this.leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void senseColor() throws InterruptedException {
@@ -368,37 +662,6 @@ public class SynergyAutoBlueJewel extends LinearOpMode {
     }
 
     public void sensePictograph() throws InterruptedException {
-        /*
-        * To start up Vuforia, tell it the view that we wish to use for camera monitor (on the RC phone);
-        * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
-        */
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-
-        // OR...  Do Not Activate the Camera Monitor View, to save power
-        // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-        /*
-         * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
-         * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
-         * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
-         * web site at https://developer.vuforia.com/license-manager.
-         *
-         * Vuforia license keys are always 380 characters long, and look as if they contain mostly
-         * random data. As an example, here is a example of a fragment of a valid key:
-         *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
-         * Once you've obtained a license key, copy the string from the Vuforia web site
-         * and paste it in to your code onthe next line, between the double quotes.
-         */
-        parameters.vuforiaLicenseKey = "AToaQHT/////AAAAGVlEmfHGCEBvpO9+LDtLj0l8DvOeohU4FwBvMiWCfaZuiAhtRFKLnku1xVmWpr1AyFGJ3vufY4HpayP44D5ZSmVg6pxonVjXN4HULK10Z3sA8zXdGbHccIkVp0h7teeFC7OyI3cy/+/I6scuRBWgUYjP0300xAD80dfV/Z5ra8MTHW3OuLyd4hpC/EMP27Af5a+M+Z2+DaEYw78jGKAW335HsHRC45E65I2ozwtIEwnJDeCvHD4ulFnC0v/+4kUDynCAKBd9eNvidbixN6nWN7ltOYFf4TwTYNLMKNgIex0zyGUjRfabJGugkCgB2dKbKrNzMYK2oLOqODgcaI7lHdkGosf00X1X3yduZOuh/ccY";
-
-        /*
-         * We also indicate which camera on the RC that we wish to use.
-         * Here we chose the back (HiRes) camera (for greater range), but
-         * for a competition robot, the front camera might be more convenient.
-         */
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
         /**
          * Load the data set containing the VuMarks for Relic Recovery. There's only one trackable
@@ -414,8 +677,8 @@ public class SynergyAutoBlueJewel extends LinearOpMode {
         telemetry.update();
 
         relicTrackables.activate();
-
-        while (opModeIsActive()) {
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds() < 1.0) {
 
             /**
              * See if any of the instances of {@link relicTemplate} are currently visible.
