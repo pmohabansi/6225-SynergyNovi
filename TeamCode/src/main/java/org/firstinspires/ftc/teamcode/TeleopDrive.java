@@ -21,18 +21,20 @@ public class TeleopDrive extends LinearOpMode {
     double leftRearWheelPower;
     double rightRearWheelPower;
     double armLiftPower;
-    double range = 0.5;
+    double range           = 0.5;
     double openArmPosition = 0.3;
     double grabArmPosition = 0.6;
+    double jewelServoInitPosition;
 
     // Define variables for motors which are connected to the wheels to rotate.
-    DcMotor leftFrontWheelMotor = null;
+    DcMotor leftFrontWheelMotor  = null;
     DcMotor rightFrontWheelMotor = null;
-    DcMotor leftRearWheelMotor = null;
-    DcMotor rightRearWheelMotor = null;
-    DcMotor armLiftMotor = null;
-    Servo leftArmMotor = null;
-    Servo rightArmMotor = null;
+    DcMotor leftRearWheelMotor   = null;
+    DcMotor rightRearWheelMotor  = null;
+    DcMotor armLiftMotor         = null;
+    Servo   leftArmMotor         = null;
+    Servo   rightArmMotor        = null;
+    Servo   jewelServo           = null;
 
     // Declare LinearOpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -44,13 +46,14 @@ public class TeleopDrive extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        leftFrontWheelMotor = hardwareMap.get(DcMotor.class, "lf");
+        leftFrontWheelMotor  = hardwareMap.get(DcMotor.class, "lf");
         rightFrontWheelMotor = hardwareMap.get(DcMotor.class, "rf");
-        leftRearWheelMotor = hardwareMap.get(DcMotor.class, "lr");
-        rightRearWheelMotor = hardwareMap.get(DcMotor.class, "rr");
-        armLiftMotor = hardwareMap.dcMotor.get("al");
-        leftArmMotor = hardwareMap.servo.get("las");
-        rightArmMotor = hardwareMap.servo.get("ras");
+        leftRearWheelMotor   = hardwareMap.get(DcMotor.class, "lr");
+        rightRearWheelMotor  = hardwareMap.get(DcMotor.class, "rr");
+        armLiftMotor         = hardwareMap.dcMotor.get("al");
+        leftArmMotor         = hardwareMap.servo.get("las");
+        rightArmMotor        = hardwareMap.servo.get("ras");
+        jewelServo           = hardwareMap.servo.get("jewelServo");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -61,12 +64,14 @@ public class TeleopDrive extends LinearOpMode {
         armLiftMotor.setDirection(DcMotor.Direction.FORWARD);
         leftArmMotor.setDirection(Servo.Direction.FORWARD);
         rightArmMotor.setDirection(Servo.Direction.REVERSE);
+        jewelServo.setDirection(Servo.Direction.FORWARD);
 
         leftRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         armLiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        jewelServoInitPosition = jewelServo.getPosition();
         leftArmMotor.setPosition(openArmPosition);
         rightArmMotor.setPosition(openArmPosition);
 
@@ -76,6 +81,8 @@ public class TeleopDrive extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+            jewelServo.setPosition(jewelServoInitPosition); // hold the position.
+
             // Initialize power to zero so in case user is not pressing any keys then
             // robot should remain in same position.
             leftFrontWheelPower = 0;
@@ -85,8 +92,8 @@ public class TeleopDrive extends LinearOpMode {
             armLiftPower = 0;
 
             // calculated power to be given to wheels
-            // if power value is -ve then wheels rotate forward &
-            // when power value is +ve then wheels rotate backward
+            // if power value is -ve then robot forward &
+            // when power value is +ve then robot backward
             if (gamepad1.right_stick_y != 0) {
                 // This is for moving the robot forward and reverse
                 telemetry.addLine("forward/back");
