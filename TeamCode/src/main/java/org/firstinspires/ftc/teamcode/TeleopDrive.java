@@ -11,8 +11,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+@SuppressWarnings({"WeakerAccess", "FieldCanBeLocal"})
+
 @TeleOp(name = "Concept: TeleopDrive", group = "Concept")
-//@Disabled
 public class TeleopDrive extends LinearOpMode {
 
     // Define variables for power to be given to the motors.
@@ -37,7 +38,7 @@ public class TeleopDrive extends LinearOpMode {
     Servo   jewelServo           = null;
 
     // Declare LinearOpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
+    ElapsedTime runtime = new ElapsedTime();
 
     @Override
     public void runOpMode() {
