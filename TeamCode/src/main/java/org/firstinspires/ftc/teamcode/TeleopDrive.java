@@ -22,12 +22,12 @@ public class TeleopDrive extends LinearOpMode {
     double leftRearWheelPower;
     double rightRearWheelPower;
     double armLiftPower;
-    double range           = 0.5;
-    double openArmPosition = 0.3;
-    double grabArmPosition = 0.6;
+    double range            = 0.5;
+    double openArmPosition  = 0.3;
+    double closeArmPosition = 0.8;
     double jewelServoInitPosition;
 
-    // Define variables for motors which are connected to the wheels to rotate.
+    // Define variables for motors which are connected` to the wheels to rotate.
     DcMotor leftFrontWheelMotor  = null;
     DcMotor rightFrontWheelMotor = null;
     DcMotor leftRearWheelMotor   = null;
@@ -169,8 +169,8 @@ public class TeleopDrive extends LinearOpMode {
             }
             if (gamepad2.right_trigger != 0) {
                 // This is for opening the arms
-                leftArmMotor.setPosition(grabArmPosition);
-                rightArmMotor.setPosition(grabArmPosition);
+                leftArmMotor.setPosition(closeArmPosition);
+                rightArmMotor.setPosition(closeArmPosition);
                 telemetry.addData("left Arm Position", leftArmMotor.getPosition());
                 telemetry.addData("right Arm Position", rightArmMotor.getPosition());
             } else if (gamepad2.left_trigger != 0) {
