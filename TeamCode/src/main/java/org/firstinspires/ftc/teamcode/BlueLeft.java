@@ -327,7 +327,7 @@ public class BlueLeft extends LinearOpMode {
 //        }
 //        encoderDrive(DRIVE_SPEED, 0, safeZoneDist);
 //        //glide right into safezone
-//        encoderDrive(DRIVE_SPEED, 2, 8);
+        encoderDrive(DRIVE_SPEED, 2, 8);
 
 
     }
