@@ -22,9 +22,11 @@ public class TeleopDrive extends LinearOpMode {
     double leftRearWheelPower;
     double rightRearWheelPower;
     double armLiftPower;
-    double range            = 0.5;
-    double openArmPosition  = 0.3;
-    double closeArmPosition = 0.8;
+    double range               = 0.75;
+    double openArmPosition     = 0.3;
+    double closeArmPosition    = 0.8;
+    double openArmPositionSub  = 0.3;
+    double closeArmPositionSub = 0.5;
     double jewelServoInitPosition;
 
     // Define variables for motors which are connected` to the wheels to rotate.
@@ -167,6 +169,13 @@ public class TeleopDrive extends LinearOpMode {
                 leftRearWheelPower = range;
                 rightRearWheelPower = 0;
             }
+
+            if (gamepad2.right_stick_y != 0) {
+                // This is to lift arm
+                armLiftPower = Range.clip(gamepad2.right_stick_y, -range, range);
+            }
+
+            // no "else if" will allow to lift arm as well as grab the glyph(s)
             if (gamepad2.right_trigger != 0) {
                 // This is for opening the arms
                 leftArmMotor.setPosition(closeArmPosition);
@@ -179,11 +188,19 @@ public class TeleopDrive extends LinearOpMode {
                 rightArmMotor.setPosition(openArmPosition);
                 telemetry.addData("left Arm Position", leftArmMotor.getPosition());
                 telemetry.addData("right Arm Position", rightArmMotor.getPosition());
-            } else if (gamepad2.right_stick_y != 0) {
-                // This is to lift arm
-                armLiftPower = Range.clip(gamepad2.right_stick_y, -range, range);
+            } else if ( gamepad2.left_bumper ) {
+                // This is for opening the arms
+                leftArmMotor.setPosition(closeArmPositionSub);
+                rightArmMotor.setPosition(closeArmPosition);
+                telemetry.addData("left Arm Position", leftArmMotor.getPosition());
+                telemetry.addData("right Arm Position", rightArmMotor.getPosition());
+            } else if ( gamepad2.right_bumper ) {
+                // This is for opening the arms
+                leftArmMotor.setPosition(openArmPositionSub);
+                rightArmMotor.setPosition(openArmPositionSub);
+                telemetry.addData("left Arm Position", leftArmMotor.getPosition());
+                telemetry.addData("right Arm Position", rightArmMotor.getPosition());
             }
-
 
             telemetry.addLine("");
             // Send calculated power to wheels
