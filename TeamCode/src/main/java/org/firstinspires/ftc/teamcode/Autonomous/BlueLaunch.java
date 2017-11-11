@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Autonomous(name="BlueLaunch", group="Autonomous")
-
+@Disabled
 public class BlueLaunch extends Blue {
     @Override
     protected boolean shouldLaunch() {

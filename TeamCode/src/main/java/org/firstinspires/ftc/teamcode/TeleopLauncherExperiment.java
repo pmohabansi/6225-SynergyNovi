@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "TeleopLauncherExperiment", group = "K9bot")
+@Disabled
 public class TeleopLauncherExperiment extends LinearOpMode {
 
     TeleOpHardwarev7 robot = new TeleOpHardwarev7();

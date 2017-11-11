@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Autonomous(name="Red", group="Autonomous")
-
+@Disabled
 public class Red extends Auto {
     @Override
     protected boolean isTurnRight() {

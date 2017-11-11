@@ -40,7 +40,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 @Autonomous(name="SynergyAutoBlueGlyph", group="Autonomous")
-//@Disabled
+@Disabled
 public class SynergyAutoGlyph extends LinearOpMode {
 
 
