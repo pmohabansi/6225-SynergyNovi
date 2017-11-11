@@ -241,10 +241,10 @@ public class BlueLeft extends LinearOpMode {
 
         //note: servo move + makes the arm go down
         //grip glyph in arm
-        double leftArmInitPosition = this.leftArmMotor.getPosition();
-        this.leftArmMotor.setPosition(leftArmInitPosition - 0.2);
-        double rightArmInitPosition = this.rightArmMotor.getPosition();
-        this.rightArmMotor.setPosition(rightArmInitPosition + 0.2);
+//        double leftArmInitPosition = this.leftArmMotor.getPosition();
+//        this.leftArmMotor.setPosition(leftArmInitPosition - 0.2);
+//        double rightArmInitPosition = this.rightArmMotor.getPosition();
+//        this.rightArmMotor.setPosition(rightArmInitPosition + 0.2);
         //lift glyph inside the arms of the glyph attatchment
         this.armLiftMotor.setPower(-0.4);
         while (opModeIsActive() && (runtime.seconds() < 2)) {
