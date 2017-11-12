@@ -59,9 +59,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-@Autonomous(name = "RedRight", group = "Autonomous")
+@Autonomous(name = "BlueRightTest", group = "Autonomous")
 //@Disabled
-public class RedRight extends LinearOpMode {
+public class BlueRightTest extends LinearOpMode {
     // Define variables for motors which are connected to the wheels to rotate.
     DcMotor leftFrontWheelMotor = null;
     DcMotor rightFrontWheelMotor = null;
@@ -121,7 +121,7 @@ public class RedRight extends LinearOpMode {
         rightFrontWheelMotor = hardwareMap.get(DcMotor.class, "rf");
         leftRearWheelMotor = hardwareMap.get(DcMotor.class, "lr");
         rightRearWheelMotor = hardwareMap.get(DcMotor.class, "rr");
-       // armLiftMotor = hardwareMap.dcMotor.get("al");
+        armLiftMotor = hardwareMap.dcMotor.get("al");
         leftArmMotor = hardwareMap.servo.get("las");
         rightArmMotor = hardwareMap.servo.get("ras");
         jewelServo = hardwareMap.get(Servo.class, "jewelServo");
@@ -134,7 +134,7 @@ public class RedRight extends LinearOpMode {
         leftRearWheelMotor.setDirection(DcMotor.Direction.REVERSE);
         rightRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        //armLiftMotor.setDirection(DcMotor.Direction.FORWARD);
+        armLiftMotor.setDirection(DcMotor.Direction.FORWARD);
         leftArmMotor.setDirection(Servo.Direction.FORWARD);
         rightArmMotor.setDirection(Servo.Direction.FORWARD);
 
@@ -165,8 +165,8 @@ public class RedRight extends LinearOpMode {
         this.leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //armLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //armLiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armLiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Resetting Encoders");    //
@@ -240,6 +240,21 @@ public class RedRight extends LinearOpMode {
         this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //note: servo move + makes the arm go down
+        //grip glyph in arm
+        double leftArmInitPosition = this.leftArmMotor.getPosition();
+        this.leftArmMotor.setPosition(leftArmInitPosition - 0.2);
+        double rightArmInitPosition = this.rightArmMotor.getPosition();
+        this.rightArmMotor.setPosition(rightArmInitPosition + 0.2);
+        //lift glyph inside the arms of the glyph attatchment
+        this.armLiftMotor.setPower(-0.4);
+        while (opModeIsActive() && (runtime.seconds() < 2)) {
+            idle();
+        }
+        this.armLiftMotor.setPower(0);
+        //sense the pictograph
+        sensePictograph();
+        telemetry.addData("VuMar1k", "%s visible", vuMark1);
+        telemetry.update();
         //lower jewelArm to sense color
         double servoInitPosition = this.jewelServo.getPosition();
         this.jewelServo.setPosition(servoInitPosition + 0.8);
@@ -256,10 +271,26 @@ public class RedRight extends LinearOpMode {
             tmphsvValueZero = Math.max(tmphsvValueZero, hsvValues[0]);
         }
         //inches from starting point, to right column
-        double distanceToRightColumn = 23.5;
+        double distanceToRightColumn = -23.5;
         double distanceToColumn = 0;
         //move forward if red, backwards if blue
         if (tmphsvValueZero <= 300.0 && tmphsvValueZero >= 120.0) {
+            encoderDrive(DRIVE_SPEED, 0, -12.0);
+            //sleep(1000);
+            this.jewelServo.setPosition(servoInitPosition);
+            while (runtime.seconds() < 1.0) {
+                idle();
+            }
+            //sleep(1000);
+//            if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+//                distanceToColumn = distanceToRightColumn - 5.0 + 7.63 * 2.0;
+//            } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+//                distanceToColumn = distanceToRightColumn - 5.0 + 7.63;
+//            } else {
+//                distanceToColumn = distanceToRightColumn - 5.0;
+            encoderDrive(DRIVE_SPEED, 0, -18.0);
+//            }
+        } else {
             encoderDrive(DRIVE_SPEED, 0, 5.0);
             //sleep(1000);
             this.jewelServo.setPosition(servoInitPosition);
@@ -267,29 +298,40 @@ public class RedRight extends LinearOpMode {
                 idle();
             }
             //sleep(1000);
-            encoderDrive(DRIVE_SPEED, 0, -0.0);
-
-        } else {
-            encoderDrive(DRIVE_SPEED, 0, -5.0);
-            //sleep(1000);
-            this.jewelServo.setPosition(servoInitPosition);
-            while (runtime.seconds() < 1.0) {
-                idle();
-            }
-            //sleep(1000);
-            encoderDrive(DRIVE_SPEED, 0, 10.0);
-
+//            if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+//                distanceToColumn = distanceToRightColumn + 5.0 + 7.63 * 2.0;
+//            } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+//                distanceToColumn = distanceToRightColumn + 5.0 + 7.63;
+//            } else {
+//                distanceToColumn = distanceToRightColumn + 5.0;
+//            }
+            encoderDrive(DRIVE_SPEED, 0, -35.0);
         }
         //sleep(1000);
         //move forward to cryptobox position
-        encoderDrive(DRIVE_SPEED, 0, distanceToColumn + 24);
-        //turn 90 degrees right
-        encoderDrive(DRIVE_SPEED, -1, 24);
-        //move to cryptobox
-        encoderDrive(DRIVE_SPEED, 0, 12);
+//        encoderDrive(DRIVE_SPEED, 0, distanceToColumn + 2);
+//        //turn 90 degrees right
+//        encoderDrive(DRIVE_SPEED, 1, 22);
+//        //move glyph into cryptobox
+//        encoderDrive(DRIVE_SPEED, 0, 7.5);
+//        //open glyph arm
+//        this.leftArmMotor.setPosition(leftArmInitPosition);
+//        this.rightArmMotor.setPosition(rightArmInitPosition);
+//        //park in safezone
+//        encoderDrive(DRIVE_SPEED, 0, -0.5);
+        /*
+        encoderDrive(DRIVE_SPEED, -1, 20);
+        double safeZoneDist = 7;
+        if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+            safeZoneDist = -safeZoneDist;
+        } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+            safeZoneDist = 0;
+        }
+        encoderDrive(DRIVE_SPEED, 0, safeZoneDist);
+        //glide right into safezone
+        encoderDrive(DRIVE_SPEED, 2, 8);
 
-
-
+        */
     }
 
 

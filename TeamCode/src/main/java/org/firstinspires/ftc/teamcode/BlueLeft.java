@@ -241,20 +241,8 @@ public class BlueLeft extends LinearOpMode {
 
         //note: servo move + makes the arm go down
         //grip glyph in arm
-//        double leftArmInitPosition = this.leftArmMotor.getPosition();
-//        this.leftArmMotor.setPosition(leftArmInitPosition - 0.2);
-//        double rightArmInitPosition = this.rightArmMotor.getPosition();
-//        this.rightArmMotor.setPosition(rightArmInitPosition + 0.2);
         //lift glyph inside the arms of the glyph attatchment
-        this.armLiftMotor.setPower(-0.4);
-        while (opModeIsActive() && (runtime.seconds() < 2)) {
-            idle();
-        }
-        this.armLiftMotor.setPower(0);
-        //sense the pictograph
-        sensePictograph();
-        telemetry.addData("VuMar1k", "%s visible", vuMark1);
-        telemetry.update();
+
         //lower jewelArm to sense color
         double servoInitPosition = this.jewelServo.getPosition();
         this.jewelServo.setPosition(servoInitPosition + 0.8);
@@ -278,6 +266,9 @@ public class BlueLeft extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, 0, -5.0);
             //sleep(1000);
             this.jewelServo.setPosition(servoInitPosition);
+            while (runtime.seconds() < 1.0) {
+                idle();
+            }
             //sleep(1000);
             encoderDrive(DRIVE_SPEED, 0, 0.0);
 
@@ -285,6 +276,9 @@ public class BlueLeft extends LinearOpMode {
             encoderDrive(DRIVE_SPEED, 0, 5.0);
             //sleep(1000);
             this.jewelServo.setPosition(servoInitPosition);
+            while (runtime.seconds() < 1.0) {
+                idle();
+            }
             //sleep(1000);
             encoderDrive(DRIVE_SPEED, 0, -10.0);
 

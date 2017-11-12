@@ -59,9 +59,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-@Autonomous(name = "RedRight", group = "Autonomous")
+@Autonomous(name = "RedRightTest", group = "Autonomous")
 //@Disabled
-public class RedRight extends LinearOpMode {
+public class RedRightTest extends LinearOpMode {
     // Define variables for motors which are connected to the wheels to rotate.
     DcMotor leftFrontWheelMotor = null;
     DcMotor rightFrontWheelMotor = null;
@@ -240,6 +240,21 @@ public class RedRight extends LinearOpMode {
         this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //note: servo move + makes the arm go down
+        //grip glyph in arm
+        double leftArmInitPosition = this.leftArmMotor.getPosition();
+        this.leftArmMotor.setPosition(leftArmInitPosition - 0.2);
+        double rightArmInitPosition = this.rightArmMotor.getPosition();
+        this.rightArmMotor.setPosition(rightArmInitPosition + 0.2);
+        //lift glyph inside the arms of the glyph attatchment
+//        this.armLiftMotor.setPower(-0.4);
+        while (opModeIsActive() && (runtime.seconds() < 2)) {
+            idle();
+        }
+//        this.armLiftMotor.setPower(0);
+        //sense the pictograph
+        sensePictograph();
+        telemetry.addData("VuMar1k", "%s visible", vuMark1);
+        telemetry.update();
         //lower jewelArm to sense color
         double servoInitPosition = this.jewelServo.getPosition();
         this.jewelServo.setPosition(servoInitPosition + 0.8);
@@ -288,6 +303,37 @@ public class RedRight extends LinearOpMode {
         //move to cryptobox
         encoderDrive(DRIVE_SPEED, 0, 12);
 
+        //move glyph into cryptobox
+        //encoderDrive(DRIVE_SPEED, 0, 7.5);
+        //open glyph arm
+        //this.leftArmMotor.setPosition(leftArmInitPosition);
+        //this.rightArmMotor.setPosition(rightArmInitPosition);
+        //park in safezone
+//        if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+//            distanceToColumn = distanceToRightColumn + 5.0 + 7.63 * 2.0;
+//        } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+//            distanceToColumn = distanceToRightColumn + 5.0 + 7.63;
+//        } else {
+//            distanceToColumn = distanceToRightColumn + 5.0;
+//        }
+//        encoderDrive(DRIVE_SPEED, 0, -0.5);
+//        if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+//            distanceToColumn = distanceToRightColumn - 5.0 + 7.63 * 2.0;
+//        } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+//            distanceToColumn = distanceToRightColumn - 5.0 + 7.63;
+//        } else {
+//            distanceToColumn = distanceToRightColumn - 5.0;
+//        }    /*
+//        encoderDrive(DRIVE_SPEED, -1, 20);
+//        double safeZoneDist = 7;
+//        if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+//            safeZoneDist = -safeZoneDist;
+//        } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+//            safeZoneDist = 0;
+//        }
+//        encoderDrive(DRIVE_SPEED, 0, safeZoneDist);
+//        //glide right into safezone
+//        encoderDrive(DRIVE_SPEED, 2, 8);
 
 
     }
