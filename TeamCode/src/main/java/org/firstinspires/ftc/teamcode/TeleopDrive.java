@@ -25,7 +25,7 @@ public class TeleopDrive extends LinearOpMode {
     double range               = 0.75;
     double openArmPosition     = 0.3;
     double closeArmPosition    = 0.8;
-    double openArmPositionSub  = 0.3;
+    double openArmPositionSub  = 0.5;
     double closeArmPositionSub = 0.55;
     double jewelServoInitPosition;
 
