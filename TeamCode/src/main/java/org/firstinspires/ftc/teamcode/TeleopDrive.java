@@ -23,10 +23,10 @@ public class TeleopDrive extends LinearOpMode {
     double rightRearWheelPower;
     double armLiftPower;
     double range               = 0.75;
-    double openArmPosition     = 0.3;
-    double closeArmPosition    = 0.8;
-    double openArmPositionSub  = 0.5;
-    double closeArmPositionSub = 0.55;
+    double openArmPosition     = 0.6;
+    double closeArmPosition    = 0.2;
+    double openArmPositionSub  = 0.45;
+    double closeArmPositionSub = 0.6;
     double jewelServoInitPosition;
 
     // Define variables for motors which are connected` to the wheels to rotate.
