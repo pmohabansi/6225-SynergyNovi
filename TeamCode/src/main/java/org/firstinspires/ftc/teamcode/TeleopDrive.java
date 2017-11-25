@@ -183,13 +183,13 @@ public class TeleopDrive extends LinearOpMode {
                 telemetry.addData("left Arm Position", leftArmMotor.getPosition());
                 telemetry.addData("right Arm Position", rightArmMotor.getPosition());
             } else if (gamepad2.left_trigger != 0) {
-                // This is for closing the arms
+                // This is for open the arms
                 leftArmMotor.setPosition(openArmPosition);
                 rightArmMotor.setPosition(openArmPosition);
                 telemetry.addData("left Arm Position", leftArmMotor.getPosition());
                 telemetry.addData("right Arm Position", rightArmMotor.getPosition());
             } else if ( gamepad2.left_bumper ) {
-                // This is for opening the arms
+                // This is for close the arms
                 leftArmMotor.setPosition(closeArmPositionSub);
                 rightArmMotor.setPosition(closeArmPositionSub);
                 telemetry.addData("left Arm Position", leftArmMotor.getPosition());
