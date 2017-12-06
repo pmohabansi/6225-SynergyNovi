@@ -9,6 +9,10 @@ import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Axis;
+
+import java.util.Set;
+
 /**
  * Created by alpay on 11/28/2017.
  */
@@ -16,7 +20,7 @@ import com.qualcomm.robotcore.util.Range;
 @Autonomous(name="GyroTest", group = "Autonomous")
 public class GyroTest extends LinearOpMode {
     /* Declare OpMode members. */
-    ModernRoboticsI2cGyro   gyro    = null;                    // Additional Gyro device
+//    ModernRoboticsI2cGyro   gyro    = null;                    // Additional Gyro device
     // Define variables for motors which are connected to the wheels to rotate.
     DcMotor leftFrontWheelMotor = null;
     DcMotor rightFrontWheelMotor = null;
@@ -24,10 +28,10 @@ public class GyroTest extends LinearOpMode {
     DcMotor rightRearWheelMotor = null;
     DcMotor armLiftMotor = null;
     Servo jewelServo = null;
-    Servo   leftArmMotor = null;
-    Servo   rightArmMotor = null;
+    Servo leftArmMotor = null;
+    Servo rightArmMotor = null;
     NormalizedColorSensor colorSensor;
-//    ModernRoboticsI2cGyro gyro    = null;
+    ModernRoboticsI2cGyro gyro = null;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -40,7 +44,7 @@ public class GyroTest extends LinearOpMode {
     static final double DRIVE_GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * 3.1415);
+                        (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double DRIVE_SPEED = 0.4;
     static final double TURN_SPEED  = 0.4;
     static final double DISTANCE_IN_INCHES_PER_SECOND = 30.75;    // at power 0.4
@@ -131,14 +135,23 @@ public class GyroTest extends LinearOpMode {
         }
         gyro.resetZAxisIntegrator();
 
+
         waitForStart();
+
+        while (isStarted()) {
+            telemetry.addData(">", "Robot Heading (running) = %d", gyro.getHeading());
+            telemetry.update();
+            sleep(300);
+        }
+
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
 
-        // gyroDrive(DRIVE_SPEED, 6.0, 0.0);    // Drive FWD 48 inches
-        // gyroTurn( TURN_SPEED, -90.0);         // Turn  CCW to -45 Degrees
+        //gyroDrive(DRIVE_SPEED, 18.0, 0.0);   // Drive FWD 18 inches
+        //gyroTurn(TURN_SPEED, -45.0);         // Turn  CCW to -45 Degrees
+        //gyroDrive(DRIVE_SPEED, 6.0, 0.0);     //Drive FWD 6 inches
 
         telemetry.addData("Path", "Complete");
         telemetry.update();

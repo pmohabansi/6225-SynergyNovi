@@ -36,6 +36,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -61,7 +62,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 @Autonomous(name = "RedLeftTest", group = "Autonomous")
-@Disabled
+//@Disabled
 public class RedLeftTest extends LinearOpMode {
     // Define variables for motors which are connected to the wheels to rotate.
     DcMotor leftFrontWheelMotor = null;
@@ -72,7 +73,7 @@ public class RedLeftTest extends LinearOpMode {
     Servo   jewelServo = null;
     Servo   leftArmMotor = null;
     Servo   rightArmMotor = null;
-//    ModernRoboticsI2cGyro gyro    = null;
+    ModernRoboticsI2cGyro gyro    = null;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -136,7 +137,7 @@ public class RedLeftTest extends LinearOpMode {
         rightRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
 
         armLiftMotor.setDirection(DcMotor.Direction.FORWARD);
-        leftArmMotor.setDirection(Servo.Direction.FORWARD);
+        leftArmMotor.setDirection(Servo.Direction.REVERSE);
         rightArmMotor.setDirection(Servo.Direction.FORWARD);
 
         leftFrontWheelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -243,15 +244,28 @@ public class RedLeftTest extends LinearOpMode {
         //note: servo move + makes the arm go down
         //grip glyph in arm
         double leftArmInitPosition = this.leftArmMotor.getPosition();
-        this.leftArmMotor.setPosition(leftArmInitPosition + 0.2);
         double rightArmInitPosition = this.rightArmMotor.getPosition();
-        this.rightArmMotor.setPosition(rightArmInitPosition - 0.2);
+
+        telemetry.addData("Path0", "RightArm LeftArm %f %f",
+                this.rightArmMotor.getPosition(),
+                this.leftArmMotor.getPosition());
+        telemetry.update();
+        sleep(1000);
+        this.rightArmMotor.setPosition(0.3);
+        this.leftArmMotor.setPosition(0.4);
+
         //lift glyph inside the arms of the glyph attatchment
-        this.armLiftMotor.setPower(-0.4);
-        while (opModeIsActive() && (runtime.seconds() < 2)) {
+        this.armLiftMotor.setPower(-0.2);
+        while (opModeIsActive() && (runtime.seconds() < 1)) {
             idle();
         }
+        telemetry.addData("Path0", "RightArm LeftArm %f %f",
+                this.rightArmMotor.getPosition(),
+                this.leftArmMotor.getPosition());
+        telemetry.update();
+        sleep(1000);
         this.armLiftMotor.setPower(0);
+
         //sense the pictograph
         sensePictograph();
         telemetry.addData("VuMar1k", "%s visible", vuMark1);
@@ -284,11 +298,11 @@ public class RedLeftTest extends LinearOpMode {
             }
             //sleep(1000);
             if (vuMark1.toString().toUpperCase().contains("LEFT")) {
-                distanceToColumn = distanceToRightColumn - 5.0 + 7.63 * 2.0;
+                distanceToColumn = distanceToRightColumn - 11.0 + 7.63 * 2.0;
             } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
-                distanceToColumn = distanceToRightColumn - 5.0 + 7.63;
+                distanceToColumn = distanceToRightColumn - 11.0 + 7.63;
             } else {
-                distanceToColumn = distanceToRightColumn - 5.0;
+                distanceToColumn = distanceToRightColumn - 11.0;
             }
         } else {
             encoderDrive(DRIVE_SPEED, 0, -5.0);
@@ -299,11 +313,11 @@ public class RedLeftTest extends LinearOpMode {
             }
             //sleep(1000);
             if (vuMark1.toString().toUpperCase().contains("LEFT")) {
-                distanceToColumn = distanceToRightColumn + 5.0 + 7.63 * 2.0;
+                distanceToColumn = distanceToRightColumn + 11.0 + 7.63 * 2.0;
             } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
-                distanceToColumn = distanceToRightColumn + 5.0 + 7.63;
+                distanceToColumn = distanceToRightColumn + 11.0 + 7.63;
             } else {
-                distanceToColumn = distanceToRightColumn + 5.0;
+                distanceToColumn = distanceToRightColumn + 11.0;
             }
         }
         //sleep(1000);

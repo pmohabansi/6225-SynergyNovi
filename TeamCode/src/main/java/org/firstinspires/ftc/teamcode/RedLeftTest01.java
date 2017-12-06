@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Autonomous(name = "RedLeftTest01", group = "Autonomous")
-//@Disabled
+@Disabled
 public class RedLeftTest01 extends BaseAutonomous {
 
     @Override
