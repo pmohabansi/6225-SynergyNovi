@@ -239,6 +239,7 @@ public class TeleopDrive extends LinearOpMode {
                 armLiftMotor.setTargetPosition(armLiftPosition);
                 armLiftMotor.setPower(range);
 
+                // Allow the system to work on rotating the arm lift motor to get to the new position.
                 while (opModeIsActive() && armLiftMotor.isBusy()) {
                     telemetry.addData("Status", "Run Time: " + runtime.toString());
                     telemetry.addData("ArmLiftMotor", "Arm Lift CPos(%7d) NewPos(%7d) LimitPos(%7d)",
