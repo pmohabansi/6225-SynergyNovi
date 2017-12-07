@@ -233,13 +233,33 @@ public class TeleopDrive extends LinearOpMode {
             leftRearWheelMotor.setPower(leftRearWheelPower);
             rightRearWheelMotor.setPower(rightRearWheelPower);
             armLiftMotor.setTargetPosition(armLiftPosition);
+            armLiftMotor.setPower(range);
+
+            while (opModeIsActive() && armLiftMotor.isBusy()) {
+                telemetry.addData("Status", "Run Time: " + runtime.toString());
+                telemetry.addData("ArmLiftMotor", "Arm Lift CPos(%7d) NewPos(%7d) LimitPos(%7d)",
+                        armLiftMotor.getCurrentPosition(),
+                        armLiftPosition,
+                        armLiftPositionLimit
+                );
+                telemetry.update();
+                idle();
+            }
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "front left (%.2f), front right (%.2f), rear left (%.2f)" +
-                            ", rear right (%.2f).", leftFrontWheelPower, rightFrontWheelPower,
-                    leftRearWheelPower, rightRearWheelPower);
-            telemetry.addData("ArmLiftMotor", "Arm Lift (%d) Arm Lift Limit (%d)", armLiftPosition, armLiftPositionLimit);
+            telemetry.addData("Motors", "front left (%.2f), front right (%.2f)," +
+                            " rear left (%.2f), rear right (%.2f).",
+                    leftFrontWheelPower,
+                    rightFrontWheelPower,
+                    leftRearWheelPower,
+                    rightRearWheelPower
+            );
+            telemetry.addData("ArmLiftMotor", "Arm Lift CPos(%d) NewPos(%d) LimitPos(%d)",
+                    armLiftMotor.getCurrentPosition(),
+                    armLiftPosition,
+                    armLiftPositionLimit
+            );
 
             telemetry.update();
         }
