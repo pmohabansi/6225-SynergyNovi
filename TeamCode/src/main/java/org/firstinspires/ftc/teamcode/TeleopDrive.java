@@ -187,13 +187,7 @@ public class TeleopDrive extends LinearOpMode {
 
             if (gamepad2.right_stick_y != 0) {
                 // This is to lift arm
-                if (gamepad2.right_stick_y < 0){
-                    armLiftPosition = armLiftPosition + (int)(1 * COUNTS_PER_INCH);
-                    armLiftPosition = armLiftPosition * -1;
-                } else if (gamepad2.right_stick_y > 0){
-                    armLiftPosition = armLiftPosition - (int)(1 * COUNTS_PER_INCH);
-                    armLiftPosition = java.lang.Math.abs(armLiftPosition);
-                }
+                armLiftPosition =  armLiftPosition + (int)(gamepad2.right_stick_y * COUNTS_PER_INCH);
                 armLiftPosition = Range.clip(armLiftPosition, -armLiftPositionLimit, armLiftPositionLimit);
             }
 
@@ -237,7 +231,7 @@ public class TeleopDrive extends LinearOpMode {
             telemetry.addData("Motors", "front left (%.2f), front right (%.2f), rear left (%.2f)" +
                             ", rear right (%.2f).", leftFrontWheelPower, rightFrontWheelPower,
                     leftRearWheelPower, rightRearWheelPower);
-            telemetry.addData("ArmLiftMotor", "Arm Lift (%d)", armLiftPosition);
+            telemetry.addData("ArmLiftMotor", "Arm Lift (%d) Arm Lift Limit (%d)", armLiftPosition, armLiftPositionLimit);
 
             telemetry.update();
         }
