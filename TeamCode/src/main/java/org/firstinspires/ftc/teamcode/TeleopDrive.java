@@ -237,7 +237,7 @@ public class TeleopDrive extends LinearOpMode {
             telemetry.addData("Motors", "front left (%.2f), front right (%.2f), rear left (%.2f)" +
                             ", rear right (%.2f).", leftFrontWheelPower, rightFrontWheelPower,
                     leftRearWheelPower, rightRearWheelPower);
-            telemetry.addData("ArmLiftMotor", "Arm Lift (%.2f)", armLiftPosition);
+            telemetry.addData("ArmLiftMotor", "Arm Lift (%d)", armLiftPosition);
 
             telemetry.update();
         }
