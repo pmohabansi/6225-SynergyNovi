@@ -109,7 +109,8 @@ public class TeleopDrive extends LinearOpMode {
             rightFrontWheelPower = 0;
             leftRearWheelPower = 0;
             rightRearWheelPower = 0;
-            armLiftPosition = armLiftMotor.getCurrentPosition();
+
+            int armLiftBasePosition = armLiftMotor.getCurrentPosition();
 
             // calculated power to be given to wheels
             // if power value is -ve then robot forward &
@@ -189,7 +190,7 @@ public class TeleopDrive extends LinearOpMode {
 
             if (gamepad2.right_stick_y != 0) {
                 // This is to lift arm
-                armLiftPosition =  armLiftPosition + (int)(1 * COUNTS_PER_INCH);
+                armLiftPosition =  armLiftBasePosition + (int)(1 * COUNTS_PER_INCH);
                 if(gamepad2.right_stick_y < 0) {
                     armLiftPosition = armLiftPosition*-1;
                 } else if(gamepad2.right_stick_y > 0) {
@@ -232,19 +233,24 @@ public class TeleopDrive extends LinearOpMode {
             rightFrontWheelMotor.setPower(rightFrontWheelPower);
             leftRearWheelMotor.setPower(leftRearWheelPower);
             rightRearWheelMotor.setPower(rightRearWheelPower);
-            armLiftMotor.setTargetPosition(armLiftPosition);
-            armLiftMotor.setPower(range);
 
-            while (opModeIsActive() && armLiftMotor.isBusy()) {
-                telemetry.addData("Status", "Run Time: " + runtime.toString());
-                telemetry.addData("ArmLiftMotor", "Arm Lift CPos(%7d) NewPos(%7d) LimitPos(%7d)",
-                        armLiftMotor.getCurrentPosition(),
-                        armLiftPosition,
-                        armLiftPositionLimit
-                );
-                telemetry.update();
-                idle();
+            // System should not rotate the arm lift unless & until user pushes the gamepad2.right_stick_y knob.
+            if(armLiftBasePosition != armLiftPosition) {
+                armLiftMotor.setTargetPosition(armLiftPosition);
+                armLiftMotor.setPower(range);
+
+                while (opModeIsActive() && armLiftMotor.isBusy()) {
+                    telemetry.addData("Status", "Run Time: " + runtime.toString());
+                    telemetry.addData("ArmLiftMotor", "Arm Lift CPos(%7d) NewPos(%7d) LimitPos(%7d)",
+                            armLiftMotor.getCurrentPosition(),
+                            armLiftPosition,
+                            armLiftPositionLimit
+                    );
+                    telemetry.update();
+                    idle();
+                }
             }
+            armLiftMotor.setPower(0);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
