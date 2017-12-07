@@ -21,7 +21,7 @@ public class TeleopDrive extends LinearOpMode {
     double rightFrontWheelPower;
     double leftRearWheelPower;
     double rightRearWheelPower;
-    double armLiftPower;
+    int armLiftPosition;
     double range               = 0.75;
     double openArmPosition     = 0.7;
     double closeArmPosition    = 0.45;
@@ -29,6 +29,15 @@ public class TeleopDrive extends LinearOpMode {
     double closeArmPositionSub = 0.6;
     double jewelServoInitPosition;
     double leftArmOffset = 0.1;
+
+    static final double COUNTS_PER_MOTOR_REV  = 1120;    // eg: TETRIX Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
+    static final double PULLEY_DIAMETER_INCHES = 1.05;   // For figuring circumference : used https://www.omnicalculator.com/math/circumference to convert circumference to diameter.
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+                                          (PULLEY_DIAMETER_INCHES * 3.1415);
+
+    static final double PulleyThreadLegnth= 45; // actual length is 47 inches.
+    int armLiftPositionLimit;
 
     // Define variables for motors which are connected` to the wheels to rotate.
     DcMotor leftFrontWheelMotor  = null;
@@ -74,10 +83,15 @@ public class TeleopDrive extends LinearOpMode {
         rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        armLiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        armLiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         jewelServoInitPosition = jewelServo.getPosition();
         leftArmMotor.setPosition(openArmPosition-leftArmOffset);
         rightArmMotor.setPosition(openArmPosition);
+
+        armLiftPositionLimit = armLiftMotor.getCurrentPosition() +(int) (PulleyThreadLegnth * COUNTS_PER_INCH); // Get the absolute position and then the limit values
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -93,7 +107,7 @@ public class TeleopDrive extends LinearOpMode {
             rightFrontWheelPower = 0;
             leftRearWheelPower = 0;
             rightRearWheelPower = 0;
-            armLiftPower = 0;
+            armLiftPosition = armLiftMotor.getCurrentPosition();
 
             // calculated power to be given to wheels
             // if power value is -ve then robot forward &
@@ -173,7 +187,14 @@ public class TeleopDrive extends LinearOpMode {
 
             if (gamepad2.right_stick_y != 0) {
                 // This is to lift arm
-                armLiftPower = Range.clip(gamepad2.right_stick_y, -range, range);
+                if (gamepad2.right_stick_y < 0){
+                    armLiftPosition = armLiftPosition + (int)(1 * COUNTS_PER_INCH);
+                    armLiftPosition = armLiftPosition * -1;
+                } else if (gamepad2.right_stick_y > 0){
+                    armLiftPosition = armLiftPosition - (int)(1 * COUNTS_PER_INCH);
+                    armLiftPosition = java.lang.Math.abs(armLiftPosition);
+                }
+                armLiftPosition = Range.clip(armLiftPosition, -armLiftPositionLimit, armLiftPositionLimit);
             }
 
             // no "else if" will allow to lift arm as well as grab the glyph(s)
@@ -209,14 +230,14 @@ public class TeleopDrive extends LinearOpMode {
             rightFrontWheelMotor.setPower(rightFrontWheelPower);
             leftRearWheelMotor.setPower(leftRearWheelPower);
             rightRearWheelMotor.setPower(rightRearWheelPower);
-            armLiftMotor.setPower(armLiftPower);
+            armLiftMotor.setTargetPosition(armLiftPosition);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "front left (%.2f), front right (%.2f), rear left (%.2f)" +
                             ", rear right (%.2f).", leftFrontWheelPower, rightFrontWheelPower,
                     leftRearWheelPower, rightRearWheelPower);
-            telemetry.addData("ArmLiftMotor", "Arm Lift (%.2f)", armLiftPower);
+            telemetry.addData("ArmLiftMotor", "Arm Lift (%.2f)", armLiftPosition);
 
             telemetry.update();
         }
