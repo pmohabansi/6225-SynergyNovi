@@ -21,14 +21,15 @@ public class TeleopDrive extends LinearOpMode {
     double rightFrontWheelPower;
     double leftRearWheelPower;
     double rightRearWheelPower;
-    int armLiftPosition;
-    double range               = 0.75;
+    int    armLiftNewPosition;
+    double armLiftWheelPower   = 0.75;
+    double wheelPowerLimit     = 0.75;
     double openArmPosition     = 0.7;
     double closeArmPosition    = 0.45;
     double openArmPositionSub  = 0.45;
     double closeArmPositionSub = 0.6;
     double jewelServoInitPosition;
-    double leftArmOffset = 0.1;
+    double leftArmOffset       = 0.1;
 
     static final double COUNTS_PER_MOTOR_REV  = 1120;    // eg: TETRIX Motor Encoder
     static final double DRIVE_GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
@@ -36,7 +37,7 @@ public class TeleopDrive extends LinearOpMode {
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                                           (PULLEY_DIAMETER_INCHES * 3.1415);
 
-    static final double PulleyThreadLegnth= 45; // actual length is 47 inches.
+    static final double PulleyThreadLength = 45; // actual length is 47 inches.
     int armLiftPositionLimit;
 
     // Define variables for motors which are connected` to the wheels to rotate.
@@ -93,7 +94,7 @@ public class TeleopDrive extends LinearOpMode {
         leftArmMotor.setPosition(openArmPosition-leftArmOffset);
         rightArmMotor.setPosition(openArmPosition);
 
-        armLiftPositionLimit = armLiftMotor.getCurrentPosition() +(int) (PulleyThreadLegnth * COUNTS_PER_INCH); // Get the absolute position and then the limit values
+        armLiftPositionLimit = armLiftMotor.getCurrentPosition() +(int) (PulleyThreadLength * COUNTS_PER_INCH); // Get the absolute position and then the limit values
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -122,10 +123,10 @@ public class TeleopDrive extends LinearOpMode {
                 // When Y is moved upward then system receive -ve value
                 // & when Y is moved down then system receive +ve value.
 
-                leftFrontWheelPower = Range.clip(gamepad1.right_stick_y, -range, range);
-                rightFrontWheelPower = Range.clip(gamepad1.right_stick_y, -range, range);
-                leftRearWheelPower = Range.clip(gamepad1.right_stick_y, -range, range);
-                rightRearWheelPower = Range.clip(gamepad1.right_stick_y, -range, range);
+                leftFrontWheelPower = Range.clip(gamepad1.right_stick_y, -wheelPowerLimit, wheelPowerLimit);
+                rightFrontWheelPower = Range.clip(gamepad1.right_stick_y, -wheelPowerLimit, wheelPowerLimit);
+                leftRearWheelPower = Range.clip(gamepad1.right_stick_y, -wheelPowerLimit, wheelPowerLimit);
+                rightRearWheelPower = Range.clip(gamepad1.right_stick_y, -wheelPowerLimit, wheelPowerLimit);
             } else if (gamepad1.right_stick_x != 0) {
                 // This is for turning the robot right and left
                 telemetry.addLine("turning");
@@ -133,71 +134,71 @@ public class TeleopDrive extends LinearOpMode {
                 // Similarly when X is moved left then system receive -ve value
                 // & when X is moved right then system receive +ve value.
 
-                leftFrontWheelPower = Range.clip(-gamepad1.right_stick_x, -range, range);
-                rightFrontWheelPower = Range.clip(gamepad1.right_stick_x, -range, range);
-                leftRearWheelPower = Range.clip(-gamepad1.right_stick_x, -range, range);
-                rightRearWheelPower = Range.clip(gamepad1.right_stick_x, -range, range);
+                leftFrontWheelPower = Range.clip(-gamepad1.right_stick_x, -wheelPowerLimit, wheelPowerLimit);
+                rightFrontWheelPower = Range.clip(gamepad1.right_stick_x, -wheelPowerLimit, wheelPowerLimit);
+                leftRearWheelPower = Range.clip(-gamepad1.right_stick_x, -wheelPowerLimit, wheelPowerLimit);
+                rightRearWheelPower = Range.clip(gamepad1.right_stick_x, -wheelPowerLimit, wheelPowerLimit);
             } else if (gamepad1.right_trigger != 0) {
                 // This is for shifting the robot to the right
                 telemetry.addLine("shifting right");
 
-                leftFrontWheelPower = Range.clip(-gamepad1.right_trigger, -range, range);
-                rightFrontWheelPower = Range.clip(gamepad1.right_trigger, -range, range);
-                leftRearWheelPower = Range.clip(gamepad1.right_trigger, -range, range);
-                rightRearWheelPower = Range.clip(-gamepad1.right_trigger, -range, range);
+                leftFrontWheelPower = Range.clip(-gamepad1.right_trigger, -wheelPowerLimit, wheelPowerLimit);
+                rightFrontWheelPower = Range.clip(gamepad1.right_trigger, -wheelPowerLimit, wheelPowerLimit);
+                leftRearWheelPower = Range.clip(gamepad1.right_trigger, -wheelPowerLimit, wheelPowerLimit);
+                rightRearWheelPower = Range.clip(-gamepad1.right_trigger, -wheelPowerLimit, wheelPowerLimit);
             } else if (gamepad1.left_trigger != 0) {
                 // This is for shifting the robot to the left
                 telemetry.addLine("shifting left");
 
-                leftFrontWheelPower = Range.clip(gamepad1.left_trigger, -range, range);
-                rightFrontWheelPower = Range.clip(-gamepad1.left_trigger, -range, range);
-                leftRearWheelPower = Range.clip(-gamepad1.left_trigger, -range, range);
-                rightRearWheelPower = Range.clip(gamepad1.left_trigger, -range, range);
+                leftFrontWheelPower = Range.clip(gamepad1.left_trigger, -wheelPowerLimit, wheelPowerLimit);
+                rightFrontWheelPower = Range.clip(-gamepad1.left_trigger, -wheelPowerLimit, wheelPowerLimit);
+                leftRearWheelPower = Range.clip(-gamepad1.left_trigger, -wheelPowerLimit, wheelPowerLimit);
+                rightRearWheelPower = Range.clip(gamepad1.left_trigger, -wheelPowerLimit, wheelPowerLimit);
 
             } else if ((gamepad1.left_stick_x > 0) && (gamepad1.left_stick_y < 0)) {
                 // This is for moving the robot to the diagonal forward right
                 telemetry.addLine("diagonal forward right");
 
-                leftFrontWheelPower = -range;
+                leftFrontWheelPower = -wheelPowerLimit;
                 rightFrontWheelPower = 0;
                 leftRearWheelPower = 0;
-                rightRearWheelPower = -range;
+                rightRearWheelPower = -wheelPowerLimit;
             } else if ((gamepad1.left_stick_x < 0) && (gamepad1.left_stick_y > 0)) {
                 // This is for moving the robot to the diagonal backward left
                 telemetry.addLine("diagonal backward left");
 
-                leftFrontWheelPower = range;
+                leftFrontWheelPower = wheelPowerLimit;
                 rightFrontWheelPower = 0;
                 leftRearWheelPower = 0;
-                rightRearWheelPower = range;
+                rightRearWheelPower = wheelPowerLimit;
             } else if ((gamepad1.left_stick_x < 0) && (gamepad1.left_stick_y < 0)) {
                 // This is for moving the robot to the diagonal forward left
                 telemetry.addLine("diagonal forward left");
 
                 leftFrontWheelPower = 0;
-                rightFrontWheelPower = -range;
-                leftRearWheelPower = -range;
+                rightFrontWheelPower = -wheelPowerLimit;
+                leftRearWheelPower = -wheelPowerLimit;
                 rightRearWheelPower = 0;
             } else if ((gamepad1.left_stick_x > 0) && (gamepad1.left_stick_y > 0)) {
                 // This is for moving the robot to the diagonal backward right
                 telemetry.addLine("diagonal backward right");
 
                 leftFrontWheelPower = 0;
-                rightFrontWheelPower = range;
-                leftRearWheelPower = range;
+                rightFrontWheelPower = wheelPowerLimit;
+                leftRearWheelPower = wheelPowerLimit;
                 rightRearWheelPower = 0;
             }
 
             if (gamepad2.right_stick_y != 0) {
                 // This is to lift arm
-                armLiftPosition =  armLiftBasePosition + (int)(1 * COUNTS_PER_INCH);
+                armLiftNewPosition =  armLiftBasePosition + (int)(1 * COUNTS_PER_INCH);
                 if(gamepad2.right_stick_y < 0) {
-                    armLiftPosition = armLiftPosition*-1;
+                    armLiftNewPosition = armLiftNewPosition *-1;
                 } else if(gamepad2.right_stick_y > 0) {
-                    //armLiftPosition = armLiftPosition;
+                    //armLiftNewPosition = armLiftNewPosition;
                     // do nothing since the value is positive only.
                 }
-                armLiftPosition = Range.clip(armLiftPosition, -armLiftPositionLimit, armLiftPositionLimit);
+                armLiftNewPosition = Range.clip(armLiftNewPosition, -armLiftPositionLimit, armLiftPositionLimit);
             }
 
             // no "else if" will allow to lift arm as well as grab the glyph(s)
@@ -235,23 +236,25 @@ public class TeleopDrive extends LinearOpMode {
             rightRearWheelMotor.setPower(rightRearWheelPower);
 
             // System should not rotate the arm lift unless & until user pushes the gamepad2.right_stick_y knob.
-            if(armLiftBasePosition != armLiftPosition) {
-                armLiftMotor.setTargetPosition(armLiftPosition);
-                armLiftMotor.setPower(range);
+            if(armLiftBasePosition != armLiftNewPosition) {
+                armLiftMotor.setTargetPosition(armLiftNewPosition);
+                armLiftMotor.setPower(armLiftWheelPower); // We might need to adjust in case we observe a jerk in the movement.
 
                 // Allow the system to work on rotating the arm lift motor to get to the new position.
                 while (opModeIsActive() && armLiftMotor.isBusy()) {
                     telemetry.addData("Status", "Run Time: " + runtime.toString());
-                    telemetry.addData("ArmLiftMotor", "Arm Lift CPos(%7d) NewPos(%7d) LimitPos(%7d)",
+                    telemetry.addData("ArmLiftMotor", "Arm Lift BPos(%7d) CPos(%7d) NewPos(%7d) LimitPos(%7d)",
+                            armLiftBasePosition,
                             armLiftMotor.getCurrentPosition(),
-                            armLiftPosition,
+                            armLiftNewPosition,
                             armLiftPositionLimit
                     );
                     telemetry.update();
                     idle();
                 }
+            } else {
+                armLiftMotor.setPower(0);
             }
-            armLiftMotor.setPower(0);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -262,9 +265,10 @@ public class TeleopDrive extends LinearOpMode {
                     leftRearWheelPower,
                     rightRearWheelPower
             );
-            telemetry.addData("ArmLiftMotor", "Arm Lift CPos(%d) NewPos(%d) LimitPos(%d)",
+            telemetry.addData("ArmLiftMotor", "Arm Lift BPos(%7d) CPos(%7d) NewPos(%7d) LimitPos(%7d)",
+                    armLiftBasePosition,
                     armLiftMotor.getCurrentPosition(),
-                    armLiftPosition,
+                    armLiftNewPosition,
                     armLiftPositionLimit
             );
 
