@@ -21,7 +21,7 @@ public class TeleopDrive extends LinearOpMode {
     double rightFrontWheelPower;
     double leftRearWheelPower;
     double rightRearWheelPower;
-    int    armLiftNewPosition;
+    int    armLiftNewPosition  = 0;
     double armLiftWheelPower   = 0.75;
     double wheelPowerLimit     = 0.75;
     double openArmPosition     = 0.7;
@@ -37,8 +37,8 @@ public class TeleopDrive extends LinearOpMode {
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                                           (PULLEY_DIAMETER_INCHES * 3.1415);
 
-    static final double PulleyThreadLength = 45; // actual length is 47 inches.
-    int armLiftPositionLimit;
+    static final double PulleyThreadLength = 3; // actual complete string length is 47 inches.
+    int armLiftPositionLimit = (int) (PulleyThreadLength * COUNTS_PER_INCH); // Get the absolute position and then the limit values;
 
     // Define variables for motors which are connected` to the wheels to rotate.
     DcMotor leftFrontWheelMotor  = null;
@@ -94,8 +94,6 @@ public class TeleopDrive extends LinearOpMode {
         leftArmMotor.setPosition(openArmPosition-leftArmOffset);
         rightArmMotor.setPosition(openArmPosition);
 
-        armLiftPositionLimit = armLiftMotor.getCurrentPosition() +(int) (PulleyThreadLength * COUNTS_PER_INCH); // Get the absolute position and then the limit values
-
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
 
@@ -110,8 +108,6 @@ public class TeleopDrive extends LinearOpMode {
             rightFrontWheelPower = 0;
             leftRearWheelPower = 0;
             rightRearWheelPower = 0;
-
-            int armLiftBasePosition = armLiftMotor.getCurrentPosition();
 
             // calculated power to be given to wheels
             // if power value is -ve then robot forward &
@@ -191,14 +187,34 @@ public class TeleopDrive extends LinearOpMode {
 
             if (gamepad2.right_stick_y != 0) {
                 // This is to lift arm
-                armLiftNewPosition =  armLiftBasePosition + (int)(1 * COUNTS_PER_INCH);
                 if(gamepad2.right_stick_y < 0) {
-                    armLiftNewPosition = armLiftNewPosition *-1;
+                    armLiftNewPosition += ((int)(1 * COUNTS_PER_INCH))*-1;
                 } else if(gamepad2.right_stick_y > 0) {
-                    //armLiftNewPosition = armLiftNewPosition;
-                    // do nothing since the value is positive only.
+                    armLiftNewPosition += ((int)(1 * COUNTS_PER_INCH));
                 }
-                armLiftNewPosition = Range.clip(armLiftNewPosition, -armLiftPositionLimit, armLiftPositionLimit);
+
+                armLiftNewPosition = Range.clip(armLiftNewPosition, 0, armLiftPositionLimit);
+
+                if((armLiftNewPosition > 0) &&
+                        (armLiftNewPosition < armLiftPositionLimit)) {
+                    armLiftMotor.setTargetPosition(armLiftNewPosition);
+                    armLiftMotor.setPower(armLiftWheelPower); // We might need to adjust in case we observe a jerk in the movement.
+
+                    // Allow the system to work on rotating the arm lift motor to get to the new position.
+                    while (opModeIsActive() && armLiftMotor.isBusy()) {
+                        telemetry.addData("Status", "Run Time: " + runtime.toString());
+                        telemetry.addData("ArmLiftMotor", "Inner NewPos(%7d) LimitPos(%7d)",
+                                armLiftNewPosition,
+                                armLiftPositionLimit
+                        );
+                        telemetry.update();
+                        idle();
+                    }
+                } else {
+                    telemetry.addData("ArmLiftMotor", "armLiftNewPosition == armLiftPositionLimit");
+                    telemetry.update();
+                    armLiftMotor.setPower(0);
+                }
             }
 
             // no "else if" will allow to lift arm as well as grab the glyph(s)
@@ -235,24 +251,7 @@ public class TeleopDrive extends LinearOpMode {
             leftRearWheelMotor.setPower(leftRearWheelPower);
             rightRearWheelMotor.setPower(rightRearWheelPower);
 
-            // System should not rotate the arm lift unless & until user pushes the gamepad2.right_stick_y knob.
-            if(armLiftBasePosition != armLiftNewPosition) {
-                armLiftMotor.setTargetPosition(armLiftNewPosition);
-                armLiftMotor.setPower(armLiftWheelPower); // We might need to adjust in case we observe a jerk in the movement.
-
-                // Allow the system to work on rotating the arm lift motor to get to the new position.
-                while (opModeIsActive() && armLiftMotor.isBusy()) {
-                    telemetry.addData("Status", "Run Time: " + runtime.toString());
-                    telemetry.addData("ArmLiftMotor", "Arm Lift BPos(%7d) CPos(%7d) NewPos(%7d) LimitPos(%7d)",
-                            armLiftBasePosition,
-                            armLiftMotor.getCurrentPosition(),
-                            armLiftNewPosition,
-                            armLiftPositionLimit
-                    );
-                    telemetry.update();
-                    idle();
-                }
-            } else {
+            if(gamepad2.right_stick_y == 0){
                 armLiftMotor.setPower(0);
             }
 
@@ -265,9 +264,7 @@ public class TeleopDrive extends LinearOpMode {
                     leftRearWheelPower,
                     rightRearWheelPower
             );
-            telemetry.addData("ArmLiftMotor", "Arm Lift BPos(%7d) CPos(%7d) NewPos(%7d) LimitPos(%7d)",
-                    armLiftBasePosition,
-                    armLiftMotor.getCurrentPosition(),
+            telemetry.addData("ArmLiftMotor", "Arm Lift NewPos(%7d) LimitPos(%7d)",
                     armLiftNewPosition,
                     armLiftPositionLimit
             );
