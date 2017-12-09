@@ -21,24 +21,14 @@ public class TeleopDrive extends LinearOpMode {
     double rightFrontWheelPower;
     double leftRearWheelPower;
     double rightRearWheelPower;
-    int    armLiftNewPosition  = 0;
-    double armLiftWheelPower   = 0.75;
+    double armLiftPower;
     double wheelPowerLimit     = 0.75;
     double openArmPosition     = 0.7;
     double closeArmPosition    = 0.45;
     double openArmPositionSub  = 0.45;
     double closeArmPositionSub = 0.6;
     double jewelServoInitPosition;
-    double leftArmOffset       = 0.1;
-
-    static final double COUNTS_PER_MOTOR_REV  = 1120;    // eg: TETRIX Motor Encoder
-    static final double DRIVE_GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
-    static final double PULLEY_DIAMETER_INCHES = 1.05;   // For figuring circumference : used https://www.omnicalculator.com/math/circumference to convert circumference to diameter.
-    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-                                          (PULLEY_DIAMETER_INCHES * 3.1415);
-
-    static final double PulleyThreadLength = 3; // actual complete string length is 47 inches.
-    int armLiftPositionLimit = (int) (PulleyThreadLength * COUNTS_PER_INCH); // Get the absolute position and then the limit values;
+    double leftArmOffset = 0.1;
 
     // Define variables for motors which are connected` to the wheels to rotate.
     DcMotor leftFrontWheelMotor  = null;
@@ -84,12 +74,7 @@ public class TeleopDrive extends LinearOpMode {
         rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
         armLiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        armLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armLiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        armLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
         jewelServoInitPosition = jewelServo.getPosition();
         leftArmMotor.setPosition(openArmPosition-leftArmOffset);
         rightArmMotor.setPosition(openArmPosition);
@@ -108,6 +93,7 @@ public class TeleopDrive extends LinearOpMode {
             rightFrontWheelPower = 0;
             leftRearWheelPower = 0;
             rightRearWheelPower = 0;
+            armLiftPower = 0;
 
             // calculated power to be given to wheels
             // if power value is -ve then robot forward &
@@ -187,34 +173,7 @@ public class TeleopDrive extends LinearOpMode {
 
             if (gamepad2.right_stick_y != 0) {
                 // This is to lift arm
-                if(gamepad2.right_stick_y < 0) {
-                    armLiftNewPosition += ((int)(1 * COUNTS_PER_INCH))*-1;
-                } else if(gamepad2.right_stick_y > 0) {
-                    armLiftNewPosition += ((int)(1 * COUNTS_PER_INCH));
-                }
-
-                armLiftNewPosition = Range.clip(armLiftNewPosition, 0, armLiftPositionLimit);
-
-                if((armLiftNewPosition > 0) &&
-                        (armLiftNewPosition < armLiftPositionLimit)) {
-                    armLiftMotor.setTargetPosition(armLiftNewPosition);
-                    armLiftMotor.setPower(armLiftWheelPower); // We might need to adjust in case we observe a jerk in the movement.
-
-                    // Allow the system to work on rotating the arm lift motor to get to the new position.
-                    while (opModeIsActive() && armLiftMotor.isBusy()) {
-                        telemetry.addData("Status", "Run Time: " + runtime.toString());
-                        telemetry.addData("ArmLiftMotor", "Inner NewPos(%7d) LimitPos(%7d)",
-                                armLiftNewPosition,
-                                armLiftPositionLimit
-                        );
-                        telemetry.update();
-                        idle();
-                    }
-                } else {
-                    telemetry.addData("ArmLiftMotor", "armLiftNewPosition == armLiftPositionLimit");
-                    telemetry.update();
-                    armLiftMotor.setPower(0);
-                }
+                armLiftPower = Range.clip(gamepad2.right_stick_y, -wheelPowerLimit, wheelPowerLimit);
             }
 
             // no "else if" will allow to lift arm as well as grab the glyph(s)
@@ -250,24 +209,14 @@ public class TeleopDrive extends LinearOpMode {
             rightFrontWheelMotor.setPower(rightFrontWheelPower);
             leftRearWheelMotor.setPower(leftRearWheelPower);
             rightRearWheelMotor.setPower(rightRearWheelPower);
-
-            if(gamepad2.right_stick_y == 0){
-                armLiftMotor.setPower(0);
-            }
+            armLiftMotor.setPower(armLiftPower);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "front left (%.2f), front right (%.2f)," +
-                            " rear left (%.2f), rear right (%.2f).",
-                    leftFrontWheelPower,
-                    rightFrontWheelPower,
-                    leftRearWheelPower,
-                    rightRearWheelPower
-            );
-            telemetry.addData("ArmLiftMotor", "Arm Lift NewPos(%7d) LimitPos(%7d)",
-                    armLiftNewPosition,
-                    armLiftPositionLimit
-            );
+            telemetry.addData("Motors", "front left (%.2f), front right (%.2f), rear left (%.2f)" +
+                            ", rear right (%.2f).", leftFrontWheelPower, rightFrontWheelPower,
+                    leftRearWheelPower, rightRearWheelPower);
+            telemetry.addData("ArmLiftMotor", "Arm Lift (%.2f)", armLiftPower);
 
             telemetry.update();
         }
