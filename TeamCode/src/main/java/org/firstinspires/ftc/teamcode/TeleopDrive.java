@@ -65,7 +65,7 @@ public class TeleopDrive extends LinearOpMode {
         rightFrontWheelMotor.setDirection(DcMotor.Direction.REVERSE);
         leftRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
         rightRearWheelMotor.setDirection(DcMotor.Direction.REVERSE);
-        armLiftMotor.setDirection(DcMotor.Direction.REVERSE);
+        armLiftMotor.setDirection(DcMotor.Direction.FORWARD);
         leftArmMotor.setDirection(Servo.Direction.FORWARD);
         rightArmMotor.setDirection(Servo.Direction.REVERSE);
         jewelServo.setDirection(Servo.Direction.FORWARD);
