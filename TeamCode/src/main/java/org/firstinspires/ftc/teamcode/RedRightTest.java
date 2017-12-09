@@ -36,8 +36,8 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -61,7 +61,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 @Autonomous(name = "RedRightTest", group = "Autonomous")
-@Disabled
+//@Disabled
 public class RedRightTest extends LinearOpMode {
     // Define variables for motors which are connected to the wheels to rotate.
     DcMotor leftFrontWheelMotor = null;
@@ -72,7 +72,7 @@ public class RedRightTest extends LinearOpMode {
     Servo   jewelServo = null;
     Servo   leftArmMotor = null;
     Servo   rightArmMotor = null;
-//    ModernRoboticsI2cGyro gyro    = null;
+    ModernRoboticsI2cGyro gyro    = null;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -122,7 +122,7 @@ public class RedRightTest extends LinearOpMode {
         rightFrontWheelMotor = hardwareMap.get(DcMotor.class, "rf");
         leftRearWheelMotor = hardwareMap.get(DcMotor.class, "lr");
         rightRearWheelMotor = hardwareMap.get(DcMotor.class, "rr");
-       // armLiftMotor = hardwareMap.dcMotor.get("al");
+        armLiftMotor = hardwareMap.dcMotor.get("al");
         leftArmMotor = hardwareMap.servo.get("las");
         rightArmMotor = hardwareMap.servo.get("ras");
         jewelServo = hardwareMap.get(Servo.class, "jewelServo");
@@ -135,9 +135,9 @@ public class RedRightTest extends LinearOpMode {
         leftRearWheelMotor.setDirection(DcMotor.Direction.REVERSE);
         rightRearWheelMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        //armLiftMotor.setDirection(DcMotor.Direction.FORWARD);
+        armLiftMotor.setDirection(DcMotor.Direction.FORWARD);
         leftArmMotor.setDirection(Servo.Direction.FORWARD);
-        rightArmMotor.setDirection(Servo.Direction.FORWARD);
+        rightArmMotor.setDirection(Servo.Direction.REVERSE);
 
         leftFrontWheelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftRearWheelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -166,8 +166,8 @@ public class RedRightTest extends LinearOpMode {
         this.leftFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.rightRearWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //armLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //armLiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armLiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Resetting Encoders");    //
@@ -243,15 +243,28 @@ public class RedRightTest extends LinearOpMode {
         //note: servo move + makes the arm go down
         //grip glyph in arm
         double leftArmInitPosition = this.leftArmMotor.getPosition();
-        this.leftArmMotor.setPosition(leftArmInitPosition - 0.2);
         double rightArmInitPosition = this.rightArmMotor.getPosition();
-        this.rightArmMotor.setPosition(rightArmInitPosition + 0.2);
+
+        telemetry.addData("Path0", "RightArm LeftArm %f %f",
+                this.rightArmMotor.getPosition(),
+                this.leftArmMotor.getPosition());
+        telemetry.update();
+        sleep(1000);
+        this.rightArmMotor.setPosition(0.3);
+        this.leftArmMotor.setPosition(0.4);
+
         //lift glyph inside the arms of the glyph attatchment
-//        this.armLiftMotor.setPower(-0.4);
-        while (opModeIsActive() && (runtime.seconds() < 2)) {
+        this.armLiftMotor.setPower(-0.3);
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             idle();
         }
-//        this.armLiftMotor.setPower(0);
+        telemetry.addData("Path0", "RightArm LeftArm %f %f",
+                this.rightArmMotor.getPosition(),
+                this.leftArmMotor.getPosition());
+        telemetry.update();
+        sleep(1000);
+        this.armLiftMotor.setPower(0);
+
         //sense the pictograph
         sensePictograph();
         telemetry.addData("VuMar1k", "%s visible", vuMark1);
@@ -272,7 +285,7 @@ public class RedRightTest extends LinearOpMode {
             tmphsvValueZero = Math.max(tmphsvValueZero, hsvValues[0]);
         }
         //inches from starting point, to right column
-        double distanceToRightColumn = 23.5;
+        double distanceToRightColumn = 24.5;
         double distanceToColumn = 0;
         //move forward if red, backwards if blue
         if (tmphsvValueZero <= 300.0 && tmphsvValueZero >= 120.0) {
@@ -283,8 +296,13 @@ public class RedRightTest extends LinearOpMode {
                 idle();
             }
             //sleep(1000);
-            encoderDrive(DRIVE_SPEED, 0, -0.0);
-
+            if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+                distanceToColumn = distanceToRightColumn + 7.63 * 2.0;
+            } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+                distanceToColumn = distanceToRightColumn + 7.63;
+            } else {
+                distanceToColumn = distanceToRightColumn ;
+            }
         } else {
             encoderDrive(DRIVE_SPEED, 0, -5.0);
             //sleep(1000);
@@ -293,50 +311,57 @@ public class RedRightTest extends LinearOpMode {
                 idle();
             }
             //sleep(1000);
-            encoderDrive(DRIVE_SPEED, 0, 10.0);
-
+            if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+                distanceToColumn = distanceToRightColumn + 9.0 + 7.63 * 2.0;
+            } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+                distanceToColumn = distanceToRightColumn + 9.0 + 7.63;
+            } else {
+                distanceToColumn = distanceToRightColumn + 9.0;
+            }
         }
         //sleep(1000);
         //move forward to cryptobox position
-        encoderDrive(DRIVE_SPEED, 0, distanceToColumn + 24);
+        encoderDrive(DRIVE_SPEED, 0, distanceToColumn);
         //turn 90 degrees right
-        encoderDrive(DRIVE_SPEED, -1, 24);
-        //move to cryptobox
-        encoderDrive(DRIVE_SPEED, 0, 12);
-
+        encoderDrive(DRIVE_SPEED, 1, 24);
         //move glyph into cryptobox
-        //encoderDrive(DRIVE_SPEED, 0, 7.5);
+        encoderDrive(DRIVE_SPEED, 0, 6.5);
         //open glyph arm
-        //this.leftArmMotor.setPosition(leftArmInitPosition);
-        //this.rightArmMotor.setPosition(rightArmInitPosition);
-        //park in safezone
-//        if (vuMark1.toString().toUpperCase().contains("LEFT")) {
-//            distanceToColumn = distanceToRightColumn + 5.0 + 7.63 * 2.0;
-//        } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
-//            distanceToColumn = distanceToRightColumn + 5.0 + 7.63;
-//        } else {
-//            distanceToColumn = distanceToRightColumn + 5.0;
-//        }
-//        encoderDrive(DRIVE_SPEED, 0, -0.5);
-//        if (vuMark1.toString().toUpperCase().contains("LEFT")) {
-//            distanceToColumn = distanceToRightColumn - 5.0 + 7.63 * 2.0;
-//        } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
-//            distanceToColumn = distanceToRightColumn - 5.0 + 7.63;
-//        } else {
-//            distanceToColumn = distanceToRightColumn - 5.0;
-//        }    /*
-//        encoderDrive(DRIVE_SPEED, -1, 20);
-//        double safeZoneDist = 7;
-//        if (vuMark1.toString().toUpperCase().contains("LEFT")) {
-//            safeZoneDist = -safeZoneDist;
-//        } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
-//            safeZoneDist = 0;
-//        }
-//        encoderDrive(DRIVE_SPEED, 0, safeZoneDist);
-//        //glide right into safezone
-//        encoderDrive(DRIVE_SPEED, 2, 8);
+        this.leftArmMotor.setPosition(0.55);
+        this.rightArmMotor.setPosition(0.65);
+        encoderDrive(DRIVE_SPEED, -1, 10);
+        encoderDrive(DRIVE_SPEED, 1, 4);
+        //drive back
+        encoderDrive(DRIVE_SPEED, 0, -3);
+        this.armLiftMotor.setPower(0.3);
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
+            idle();
+        }
+        telemetry.addData("Path0", "RightArm LeftArm %f %f",
+                this.rightArmMotor.getPosition(),
+                this.leftArmMotor.getPosition());
+        telemetry.update();
+        sleep(1000);
+        this.armLiftMotor.setPower(0);
 
+//        this.leftArmMotor.setPosition(0.0);
+//        this.rightArmMotor.setPosition(-0.0);
+//        encoderDrive(DRIVE_SPEED, 0, 6.25);
+//        //drive back
+//        encoderDrive(DRIVE_SPEED, 0, -2);
+        /*
+        encoderDrive(DRIVE_SPEED, -1, 20);
+        double safeZoneDist = 7;
+        if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+            safeZoneDist = -safeZoneDist;
+        } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+            safeZoneDist = 0;
+        }
+        encoderDrive(DRIVE_SPEED, 0, safeZoneDist);
+        //glide right into safezone
+        encoderDrive(DRIVE_SPEED, 2, 8);
 
+        */
     }
 
 

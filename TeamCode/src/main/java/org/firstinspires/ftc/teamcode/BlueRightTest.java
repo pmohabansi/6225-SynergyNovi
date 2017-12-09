@@ -38,7 +38,6 @@ import android.view.View;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -61,9 +60,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-@Autonomous(name = "RedLeftTest", group = "Autonomous")
+@Autonomous(name = "BlueRightTest", group = "Autonomous")
 //@Disabled
-public class RedLeftTest extends LinearOpMode {
+public class BlueRightTest extends LinearOpMode {
     // Define variables for motors which are connected to the wheels to rotate.
     DcMotor leftFrontWheelMotor = null;
     DcMotor rightFrontWheelMotor = null;
@@ -86,7 +85,7 @@ public class RedLeftTest extends LinearOpMode {
     static final double DRIVE_GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-                                          (WHEEL_DIAMETER_INCHES * 3.1415);
+            (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double DRIVE_SPEED = 0.4;
     static final double TURN_SPEED  = 0.4;
     static final double DISTANCE_IN_INCHES_PER_SECOND = 30.75;    // at power 0.4
@@ -286,25 +285,10 @@ public class RedLeftTest extends LinearOpMode {
             tmphsvValueZero = Math.max(tmphsvValueZero, hsvValues[0]);
         }
         //inches from starting point, to right column
-        double distanceToRightColumn = 23.5;
+        double distanceToRightColumn = -24.0;
         double distanceToColumn = 0;
         //move forward if red, backwards if blue
         if (tmphsvValueZero <= 300.0 && tmphsvValueZero >= 120.0) {
-            encoderDrive(DRIVE_SPEED, 0, 5.0);
-            //sleep(1000);
-            this.jewelServo.setPosition(servoInitPosition);
-            while (runtime.seconds() < 1.0) {
-                idle();
-            }
-            //sleep(1000);
-            if (vuMark1.toString().toUpperCase().contains("LEFT")) {
-                distanceToColumn = distanceToRightColumn + 7.63 * 2.0;
-            } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
-                distanceToColumn = distanceToRightColumn + 7.63;
-            } else {
-                distanceToColumn = distanceToRightColumn ;
-            }
-        } else {
             encoderDrive(DRIVE_SPEED, 0, -5.0);
             //sleep(1000);
             this.jewelServo.setPosition(servoInitPosition);
@@ -312,32 +296,54 @@ public class RedLeftTest extends LinearOpMode {
                 idle();
             }
             //sleep(1000);
-            if (vuMark1.toString().toUpperCase().contains("LEFT")) {
-                distanceToColumn = distanceToRightColumn + 9.0 + 7.63 * 2.0;
+            if (vuMark1.toString().toUpperCase().contains("RIGHT")) {
+                distanceToColumn = distanceToRightColumn - 7.63 * 2.0;
             } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
-                distanceToColumn = distanceToRightColumn + 9.0 + 7.63;
+                distanceToColumn = distanceToRightColumn - 7.63;
             } else {
-                distanceToColumn = distanceToRightColumn + 9.0;
+                distanceToColumn = distanceToRightColumn ;
+            }
+        } else {
+            encoderDrive(DRIVE_SPEED, 0, 5.0);
+            //sleep(1000);
+            this.jewelServo.setPosition(servoInitPosition);
+            while (runtime.seconds() < 1.0) {
+                idle();
+            }
+            //sleep(1000);
+            if (vuMark1.toString().toUpperCase().contains("RIGHT")) {
+                distanceToColumn = distanceToRightColumn - 8.0 - 7.63 * 2.0;
+            } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
+                distanceToColumn = distanceToRightColumn - 8.0 - 7.63;
+            } else {
+                distanceToColumn = distanceToRightColumn - 8.0;
             }
         }
         //sleep(1000);
         //move forward to cryptobox position
-        encoderDrive(DRIVE_SPEED, 0, distanceToColumn + 2);
+        encoderDrive(DRIVE_SPEED, 0, distanceToColumn);
         //turn 90 degrees right
         encoderDrive(DRIVE_SPEED, 1, 24);
         //move glyph into cryptobox
-        encoderDrive(DRIVE_SPEED, 0, 5.5);
+        encoderDrive(DRIVE_SPEED, 0, 6.5);
         //open glyph arm
-        this.leftArmMotor.setPosition(0.6);
-        this.rightArmMotor.setPosition(0.7);
+        this.leftArmMotor.setPosition(0.55);
+        this.rightArmMotor.setPosition(0.65);
         encoderDrive(DRIVE_SPEED, -1, 10);
         encoderDrive(DRIVE_SPEED, 1, 4);
         //drive back
         encoderDrive(DRIVE_SPEED, 0, -3);
         this.armLiftMotor.setPower(0.3);
-        while (opModeIsActive() && (runtime.seconds() < 1.75)) {
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             idle();
         }
+        telemetry.addData("Path0", "RightArm LeftArm %f %f",
+                this.rightArmMotor.getPosition(),
+                this.leftArmMotor.getPosition());
+        telemetry.update();
+        sleep(1000);
+        this.armLiftMotor.setPower(0);
+
 //        this.leftArmMotor.setPosition(0.0);
 //        this.rightArmMotor.setPosition(-0.0);
 //        encoderDrive(DRIVE_SPEED, 0, 6.25);
@@ -676,9 +682,3 @@ public class RedLeftTest extends LinearOpMode {
         return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
     }
 }
-
-
-
-
-
-

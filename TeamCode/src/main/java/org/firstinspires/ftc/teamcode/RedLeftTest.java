@@ -286,7 +286,7 @@ public class RedLeftTest extends LinearOpMode {
             tmphsvValueZero = Math.max(tmphsvValueZero, hsvValues[0]);
         }
         //inches from starting point, to right column
-        double distanceToRightColumn = 23.5;
+        double distanceToRightColumn = 24.5;
         double distanceToColumn = 0;
         //move forward if red, backwards if blue
         if (tmphsvValueZero <= 300.0 && tmphsvValueZero >= 120.0) {
@@ -298,11 +298,11 @@ public class RedLeftTest extends LinearOpMode {
             }
             //sleep(1000);
             if (vuMark1.toString().toUpperCase().contains("LEFT")) {
-                distanceToColumn = distanceToRightColumn - 9.0 + 7.63 * 2.0;
+                distanceToColumn = distanceToRightColumn + 7.63 * 2.0;
             } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
-                distanceToColumn = distanceToRightColumn - 9.0 + 7.63;
+                distanceToColumn = distanceToRightColumn + 7.63;
             } else {
-                distanceToColumn = distanceToRightColumn - 9.0;
+                distanceToColumn = distanceToRightColumn ;
             }
         } else {
             encoderDrive(DRIVE_SPEED, 0, -5.0);
@@ -322,22 +322,29 @@ public class RedLeftTest extends LinearOpMode {
         }
         //sleep(1000);
         //move forward to cryptobox position
-        encoderDrive(DRIVE_SPEED, 0, distanceToColumn + 2);
+        encoderDrive(DRIVE_SPEED, 0, distanceToColumn);
         //turn 90 degrees right
         encoderDrive(DRIVE_SPEED, 1, 24);
         //move glyph into cryptobox
-        encoderDrive(DRIVE_SPEED, 0, 5.5);
+        encoderDrive(DRIVE_SPEED, 0, 6.5);
         //open glyph arm
-        this.leftArmMotor.setPosition(0.6);
-        this.rightArmMotor.setPosition(0.7);
+        this.leftArmMotor.setPosition(0.55);
+        this.rightArmMotor.setPosition(0.65);
         encoderDrive(DRIVE_SPEED, -1, 10);
         encoderDrive(DRIVE_SPEED, 1, 4);
         //drive back
         encoderDrive(DRIVE_SPEED, 0, -3);
         this.armLiftMotor.setPower(0.3);
-        while (opModeIsActive() && (runtime.seconds() < 1.75)) {
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             idle();
         }
+        telemetry.addData("Path0", "RightArm LeftArm %f %f",
+                this.rightArmMotor.getPosition(),
+                this.leftArmMotor.getPosition());
+        telemetry.update();
+        sleep(1000);
+        this.armLiftMotor.setPower(0);
+
 //        this.leftArmMotor.setPosition(0.0);
 //        this.rightArmMotor.setPosition(-0.0);
 //        encoderDrive(DRIVE_SPEED, 0, 6.25);

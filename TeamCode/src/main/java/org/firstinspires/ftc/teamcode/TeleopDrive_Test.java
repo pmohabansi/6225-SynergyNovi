@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.util.Range;
 
 @SuppressWarnings({"WeakerAccess", "FieldCanBeLocal"})
 
-@TeleOp(name = "Concept: TeleopDrive", group = "Concept")
-public class TeleopDrive extends LinearOpMode {
+@TeleOp(name = "Concept: TeleopDrive_Test", group = "Concept")
+public class TeleopDrive_Test extends LinearOpMode {
 
     // Define variables for power to be given to the motors.
     double leftFrontWheelPower;
@@ -23,7 +23,8 @@ public class TeleopDrive extends LinearOpMode {
     double rightRearWheelPower;
     double armLiftPower;
     double range               = 0.6;
-    double openArmPosition     = 0.2;
+    double openArmPositionLeft = 0.8;
+    double openArmPositionRight = 0.0;
     double closeArmPosition    = 0.2;
     double openArmPositionSub  = 0.45;
     double closeArmPositionSub = 0.6;
@@ -75,8 +76,8 @@ public class TeleopDrive extends LinearOpMode {
         rightFrontWheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         armLiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         jewelServoInitPosition = jewelServo.getPosition();
-        leftArmMotor.setPosition(openArmPosition);
-        rightArmMotor.setPosition(openArmPosition);
+        leftArmMotor.setPosition(openArmPositionLeft);
+        rightArmMotor.setPosition(openArmPositionRight);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -184,8 +185,8 @@ public class TeleopDrive extends LinearOpMode {
                 telemetry.addData("right Arm Position", rightArmMotor.getPosition());
             } else if (gamepad2.left_trigger != 0) {
                 // This is for open the arms
-                leftArmMotor.setPosition(openArmPosition);
-                rightArmMotor.setPosition(openArmPosition);
+                leftArmMotor.setPosition(openArmPositionLeft);
+                rightArmMotor.setPosition(openArmPositionRight);
                 telemetry.addData("left Arm Position", leftArmMotor.getPosition());
                 telemetry.addData("right Arm Position", rightArmMotor.getPosition());
             } else if ( gamepad2.left_bumper ) {
