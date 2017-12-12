@@ -19,8 +19,7 @@ endorse or promote products derived from this software without specific prior
 written permission.
 
 NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
-LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND " AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESSFOR A PARTICULAR PURPOSE
 ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
@@ -60,7 +59,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-@Autonomous(name = "BlueRightTest", group = "Autonomous")
+@Autonomous(name = "BlueLeftTest", group = "Autonomous")
 //@Disabled
 public class BlueLeftTest extends LinearOpMode {
     // Define variables for motors which are connected to the wheels to rotate.
@@ -85,7 +84,7 @@ public class BlueLeftTest extends LinearOpMode {
     static final double DRIVE_GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-                                          (WHEEL_DIAMETER_INCHES * 3.1415);
+            (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double DRIVE_SPEED = 0.4;
     static final double TURN_SPEED  = 0.4;
     static final double DISTANCE_IN_INCHES_PER_SECOND = 30.75;    // at power 0.4
@@ -285,7 +284,7 @@ public class BlueLeftTest extends LinearOpMode {
             tmphsvValueZero = Math.max(tmphsvValueZero, hsvValues[0]);
         }
         //inches from starting point, to right column
-        double distanceToRightColumn = -24.0;
+        double distanceToRightColumn = -28;
         double distanceToColumn = 0;
         //move forward if red, backwards if blue
         if (tmphsvValueZero <= 300.0 && tmphsvValueZero >= 120.0) {
@@ -297,11 +296,19 @@ public class BlueLeftTest extends LinearOpMode {
             }
             //sleep(1000);
             if (vuMark1.toString().toUpperCase().contains("RIGHT")) {
-                distanceToColumn = distanceToRightColumn - 7.63 * 2.0;
+                distanceToColumn = distanceToRightColumn +5;
+                encoderDrive(DRIVE_SPEED, 0, distanceToColumn);
+                encoderDrive(DRIVE_SPEED, -2, 16);
+                encoderDrive(TURN_SPEED, -1, 13);
             } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
-                distanceToColumn = distanceToRightColumn - 7.63;
+                distanceToColumn = distanceToRightColumn +5;
+                encoderDrive(DRIVE_SPEED, 0, distanceToColumn);
+                encoderDrive(DRIVE_SPEED, -2, 8 );
+                encoderDrive(TURN_SPEED, -1, 13);
             } else {
-                distanceToColumn = distanceToRightColumn ;
+                distanceToColumn = distanceToRightColumn +5;
+                encoderDrive(DRIVE_SPEED, 0, distanceToColumn);
+                encoderDrive(TURN_SPEED, -1, 13);
             }
         } else {
             encoderDrive(DRIVE_SPEED, 0, 5.0);
@@ -311,26 +318,31 @@ public class BlueLeftTest extends LinearOpMode {
                 idle();
             }
             //sleep(1000);
-            if (vuMark1.toString().toUpperCase().contains("RIGHT")) {
-                distanceToColumn = distanceToRightColumn - 8.0 - 7.63 * 2.0;
+            if (vuMark1.toString().toUpperCase().contains("LEFT")) {
+                distanceToColumn = distanceToRightColumn - 10;
+                encoderDrive(DRIVE_SPEED, 0, distanceToColumn);
+                encoderDrive(DRIVE_SPEED, -2, 16);
+                encoderDrive(TURN_SPEED, -1, 13);
             } else if (vuMark1.toString().toUpperCase().contains("CENTER")) {
-                distanceToColumn = distanceToRightColumn - 8.0 - 7.63;
+                distanceToColumn = distanceToRightColumn - 10;
+                encoderDrive(DRIVE_SPEED, 0, distanceToColumn);
+                encoderDrive(DRIVE_SPEED, -2, 8 );
+                encoderDrive(TURN_SPEED, -1, 13);
             } else {
-                distanceToColumn = distanceToRightColumn - 8.0;
+                distanceToColumn = distanceToRightColumn - 10;
+                encoderDrive(DRIVE_SPEED, 0, distanceToColumn);
+                encoderDrive(TURN_SPEED, -1, 13);
             }
         }
         //sleep(1000);
-        //move forward to cryptobox position
-        encoderDrive(DRIVE_SPEED, 0, distanceToColumn);
-        //turn 90 degrees right
-        encoderDrive(DRIVE_SPEED, 1, 24);
-        //move glyph into cryptobox
-        encoderDrive(DRIVE_SPEED, 0, 6.5);
+        //turn to cryptobox
+//        encoderDrive(DRIVE_SPEED, -1, distanceToColumn);
+//        //move forward to cryptobox position
+        encoderDrive(DRIVE_SPEED, 0, 10);
+
         //open glyph arm
         this.leftArmMotor.setPosition(0.55);
         this.rightArmMotor.setPosition(0.65);
-        encoderDrive(DRIVE_SPEED, -1, 10);
-        encoderDrive(DRIVE_SPEED, 1, 4);
         //drive back
         encoderDrive(DRIVE_SPEED, 0, -3);
         this.armLiftMotor.setPower(0.3);
@@ -343,6 +355,10 @@ public class BlueLeftTest extends LinearOpMode {
         telemetry.update();
         sleep(1000);
         this.armLiftMotor.setPower(0);
+
+        encoderDrive(DRIVE_SPEED, 0, 4);
+        encoderDrive(DRIVE_SPEED, 0, -5);
+        encoderDrive(DRIVE_SPEED, -2, 3);
 
 //        this.leftArmMotor.setPosition(0.0);
 //        this.rightArmMotor.setPosition(-0.0);
